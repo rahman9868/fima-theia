@@ -4,7 +4,7 @@ import '../../data/repository/auth_repository_impl.dart';
 class LoginUseCase {
   final AuthRepositoryImpl _repo = AuthRepositoryImpl();
 
-  Future<AuthenticationTokens?> login(String email, String password) async {
+  Future<(AuthenticationTokens?, String?)> login(String email, String password) async {
     return await _repo.login(email, password);
   }
 }

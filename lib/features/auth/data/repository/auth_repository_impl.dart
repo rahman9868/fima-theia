@@ -4,7 +4,7 @@ import '../source/auth_data_source.dart';
 class AuthRepositoryImpl {
   final AuthDataSource _dataSource = AuthDataSource();
 
-  Future<AuthenticationTokens?> login(String email, String password) async {
+  Future<(AuthenticationTokens?, String?)> login(String email, String password) async {
     return await _dataSource.login(email, password);
   }
 }

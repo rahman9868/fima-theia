@@ -16,13 +16,15 @@ class LoginController extends GetxController {
     errorMessage.value = '';
     final email = emailController.text;
     final password = passwordController.text;
-    final tokens = await _loginUseCase.login(email, password);
+    final result = await _loginUseCase.login(email, password);
     isLoading.value = false;
+    final tokens = result.$1;
+    final apiError = result.$2;
     if (tokens != null) {
       // handle successful login
       Get.snackbar('Success', 'Login successful!');
     } else {
-      errorMessage.value = 'Invalid credentials';
+      errorMessage.value = apiError ?? 'Invalid credentials';
       Get.snackbar('Error', errorMessage.value, backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
