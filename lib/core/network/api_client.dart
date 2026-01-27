@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'package:http/http.dart' as http;
 
 /// A custom exception for API errors.
@@ -23,19 +22,23 @@ class ApiClient {
 
   ApiClient(this.baseUrl);
 
+  bool get _isDebugMode {
+    var debug = false;
+    assert(debug = true);
+    return debug;
+  }
+
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     final url = Uri.parse(baseUrl + endpoint);
-    developer.log('Request URL: $url', name: 'my_app.network');
-    developer.log('Request Headers: $headers', name: 'my_app.network');
-
+    if (_isDebugMode) {
+      print('[API][GET] $url');
+      print('[API][HEADERS] $headers');
+    }
     final response = await http.get(url, headers: headers);
-
-    developer.log(
-      'Response Status Code: ${response.statusCode}',
-      name: 'my_app.network',
-    );
-    developer.log('Response Body: ${response.body}', name: 'my_app.network');
-
+    if (_isDebugMode) {
+      print('[API][STATUS] ${response.statusCode}');
+      print('[API][BODY] ${response.body}');
+    }
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return json.decode(response.body);
     } else {
@@ -60,18 +63,16 @@ class ApiClient {
     dynamic body,
   }) async {
     final url = Uri.parse(baseUrl + endpoint);
-    developer.log('Request URL: $url', name: 'my_app.network');
-    developer.log('Request Headers: $headers', name: 'my_app.network');
-    developer.log('Request Body: $body', name: 'my_app.network');
-
+    if (_isDebugMode) {
+      print('[API][POST] $url');
+      print('[API][HEADERS] $headers');
+      print('[API][BODY] $body');
+    }
     final response = await http.post(url, headers: headers, body: body);
-
-    developer.log(
-      'Response Status Code: ${response.statusCode}',
-      name: 'my_app.network',
-    );
-    developer.log('Response Body: ${response.body}', name: 'my_app.network');
-
+    if (_isDebugMode) {
+      print('[API][STATUS] ${response.statusCode}');
+      print('[API][BODY] ${response.body}');
+    }
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return json.decode(response.body);
     } else {
