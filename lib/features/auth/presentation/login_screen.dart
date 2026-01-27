@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // LOGO IMAGE (adjust path as needed)
                     const SizedBox(height: 18),
                     Image(
-                      image: AssetImage('assets/img/logo_astra.png'),
+                      image: AssetImage('assets/img/logo.png'),
                       height: 64,
                     ),
                     const SizedBox(height: 12),
