@@ -1,0 +1,10 @@
+name: fira_app
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get:
+  dio:
+
+flutter:
+  uses-material-design: true
