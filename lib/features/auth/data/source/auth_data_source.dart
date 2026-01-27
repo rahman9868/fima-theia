@@ -1,31 +1,36 @@
 import '../../domain/entity/authentication_tokens.dart';
-import 'package:dio/dio.dart';
-import '../../../../core/network/api_provider.dart';
+import 'package:flutter/foundation.dart';
+import '../../../../core/network/api_client.dart';
 
 class AuthDataSource {
-  Future<(AuthenticationTokens?, String?)> login(String email, String password) async {
+  final ApiClient _client = ApiClient(
+    'https://wf.dev.neo-fusion.com/fira-api/'
+  );
+
+  Future<(AuthenticationTokens?, String?)> login(String username, String password) async {
     try {
-      final response = await ApiProvider().client.post(
-        'oauth/token',
-        data: {
-          'username': email,
+      final String encodedCredentials = "ZmlyYS1hcGktY2xpZW50OnBsZWFzZS1jaGFuZ2UtdGhpcw";
+      
+      final response = await _client.post(
+      "oauth/token",
+      headers: {'Authorization': 'Basic $encodedCredentials'},
+      body: {
+          'username': username,
           'password': password,
           'grant_type': 'password',
         },
       );
-      if (response.data != null && response.data['access_token'] != null) {
-        return (AuthenticationTokens.fromJson(response.data), null);
+
+      if (response != null && response['access_token'] != null) {
+        return (AuthenticationTokens.fromJson(response), null);
       } else {
         return (null, 'Invalid response from server');
       }
-    } on DioError catch (e) {
-      if (e.response != null && e.response?.data is Map && e.response?.data['error_description'] != null) {
-        return (null, e.response?.data['error_description'].toString());
-      } else {
-        return (null, e.message);
-      }
+    } on ApiException catch (e) {
+      return (null, e.message);
     } catch (e) {
       return (null, e.toString());
     }
+      
   }
 }
