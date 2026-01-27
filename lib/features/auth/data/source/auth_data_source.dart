@@ -6,7 +6,7 @@ class AuthDataSource {
   Future<(AuthenticationTokens?, String?)> login(String email, String password) async {
     try {
       final response = await ApiProvider().client.post(
-        '/oauth/token',
+        'oauth/token',
         data: {
           'username': email,
           'password': password,
