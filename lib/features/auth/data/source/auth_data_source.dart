@@ -1,9 +1,9 @@
-import '../../domain/entity/user_entity.dart';
+import '../../domain/entity/authentication_tokens.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_provider.dart';
 
 class AuthDataSource {
-  Future<UserEntity?> login(String email, String password) async {
+  Future<AuthenticationTokens?> login(String email, String password) async {
     try {
       final response = await ApiProvider().client.post(
         '/oauth/token',
@@ -14,11 +14,7 @@ class AuthDataSource {
         },
       );
       if (response.data != null && response.data['access_token'] != null) {
-        return UserEntity(
-          email: email,
-          token: response.data['access_token'],
-          refreshToken: response.data['refresh_token'],
-        );
+        return AuthenticationTokens.fromJson(response.data);
       }
     } catch (e) {
       // Handle or log error if needed
