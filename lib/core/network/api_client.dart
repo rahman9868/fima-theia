@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import '../services/token_provider.dart';
 
 /// A custom exception for API errors.
 class ApiException implements Exception {
@@ -19,6 +21,7 @@ class ApiException implements Exception {
 
 class ApiClient {
   final String baseUrl;
+  final TokenProvider _tokenProvider = Get.find<TokenProvider>();
 
   ApiClient(this.baseUrl);
 
@@ -28,8 +31,20 @@ class ApiClient {
     return debug;
   }
 
+  Future<Map<String, String>> _injectAuthHeaders(
+    Map<String, String>? headers,
+  ) async {
+    headers ??= {};
+    final accessToken = await _tokenProvider.getAccessToken();
+    if (accessToken != null) {
+      headers['Authorization'] = 'Bearer $accessToken';
+    }
+    return headers;
+  }
+
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     final url = Uri.parse(baseUrl + endpoint);
+    headers = await _injectAuthHeaders(headers);
     if (_isDebugMode) {
       print('[API][GET] $url');
       print('[API][HEADERS] $headers');
@@ -43,7 +58,7 @@ class ApiClient {
       return json.decode(response.body);
     } else {
       final errorBody = json.decode(response.body);
-      if (errorBody.containsKey('error_description')) {
+      if (errorBody is Map && errorBody.containsKey('error_description')) {
         throw ApiException(
           errorBody['error_description'],
           statusCode: response.statusCode,
@@ -61,8 +76,12 @@ class ApiClient {
     String endpoint, {
     Map<String, String>? headers,
     dynamic body,
+    bool requireAuth = true,
   }) async {
     final url = Uri.parse(baseUrl + endpoint);
+    if (requireAuth) {
+      headers = await _injectAuthHeaders(headers);
+    }
     if (_isDebugMode) {
       print('[API][POST] $url');
       print('[API][HEADERS] $headers');
@@ -77,7 +96,7 @@ class ApiClient {
       return json.decode(response.body);
     } else {
       final errorBody = json.decode(response.body);
-      if (errorBody.containsKey('error_description')) {
+      if (errorBody is Map && errorBody.containsKey('error_description')) {
         throw ApiException(
           errorBody['error_description'],
           statusCode: response.statusCode,

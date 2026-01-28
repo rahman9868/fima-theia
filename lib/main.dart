@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'package:get/get.dart';
 
-void main() {
+import 'core/services/token_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Get.putAsync(() => TokenProvider().init());
   runApp(const MyApp());
 }
 
