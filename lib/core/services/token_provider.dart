@@ -12,7 +12,9 @@ class TokenProvider extends GetxService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> getAccessToken() async {
-    return await _storage.read(key: _accessTokenKey);
+    final token = await _storage.read(key: _accessTokenKey);
+    print('[TOKEN PROVIDER] Get accessToken: $token');
+    return token;
   }
 
   Future<String?> getRefreshToken() async {
@@ -22,6 +24,7 @@ class TokenProvider extends GetxService {
   Future<void> saveTokens(String accessToken, String refreshToken) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
+    print('[TOKEN PROVIDER] Saved accessToken: $accessToken, refreshToken: $refreshToken');
   }
 
   Future<void> clearTokens() async {

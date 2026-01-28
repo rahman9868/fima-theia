@@ -18,6 +18,7 @@ class AuthRepositoryImpl implements AuthRepository {
     if (tokens.refreshToken != null) {
       await _secureStorage.write(key: 'refreshToken', value: tokens.refreshToken);
     }
+    print("[saveTokens] => ${tokens.accessToken}");
   }
 
   @override
