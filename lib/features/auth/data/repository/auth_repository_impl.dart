@@ -6,6 +6,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AuthRepositoryImpl implements AuthRepository {
   final _dataSource = AuthDataSource();
   final _secureStorage = const FlutterSecureStorage();
+  static const _accessTokenKey = 'access_token';
+  static const _refreshTokenKey = 'refresh_token';
 
   @override
   Future<(AuthenticationTokens?, String?)> login(String email, String password) async {
@@ -14,17 +16,19 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> saveTokens(AuthenticationTokens tokens) async {
-    await _secureStorage.write(key: 'accessToken', value: tokens.accessToken);
+    await _secureStorage.write(key: _accessTokenKey, value: tokens.accessToken);
     if (tokens.refreshToken != null) {
-      await _secureStorage.write(key: 'refreshToken', value: tokens.refreshToken);
+      await _secureStorage.write(key: _refreshTokenKey, value: tokens.refreshToken);
     }
-    print("[saveTokens] => ${tokens.accessToken}");
+
+    final token = await getTokens();
+    print("[saveTokens] => ${token?.accessToken}");
   }
 
   @override
   Future<AuthenticationTokens?> getTokens() async {
-    final accessToken = await _secureStorage.read(key: 'accessToken');
-    final refreshToken = await _secureStorage.read(key: 'refreshToken');
+    final accessToken = await _secureStorage.read(key: _accessTokenKey);
+    final refreshToken = await _secureStorage.read(key: _refreshTokenKey);
     if (accessToken != null) {
       return AuthenticationTokens(accessToken: accessToken, refreshToken: refreshToken);
     }
@@ -33,7 +37,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> clearTokens() async {
-    await _secureStorage.delete(key: 'accessToken');
-    await _secureStorage.delete(key: 'refreshToken');
+    await _secureStorage.delete(key: _accessTokenKey);
+    await _secureStorage.delete(key: _refreshTokenKey);
   }
 }
