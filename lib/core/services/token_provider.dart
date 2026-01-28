@@ -2,6 +2,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 
 class TokenProvider extends GetxService {
+  Future<TokenProvider> init() async {
+    // Put any asynchronous initialization logic here if necessary
+    return this;
+  }
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
 
