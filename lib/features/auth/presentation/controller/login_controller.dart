@@ -19,28 +19,14 @@ class LoginController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _checkIsLoggedIn();
-  }
-
-  Future<void> _checkIsLoggedIn() async {
+  Future<void> checkIsLoggedIn(BuildContext? context) async {
     final tokenProvider = Get.find<TokenProvider>();
     final token = await tokenProvider.getAccessToken();
-    // User profile from Hive (if exists)
     try {
       final userBox = await Hive.openBox<User>('userBox');
       final user = userBox.get('profile');
-      if (token != null && token.isNotEmpty && user != null) {
-        // ignore context = null warning because onInit runs before context assigned.
-        // Navigation context passed from app layer.
-        Future.delayed(Duration.zero, () {
-          final context = Get.context;
-          if (context != null) {
-            context.go('/dashboard');
-          }
-        });
+      if (token != null && token.isNotEmpty && user != null && context != null) {
+        context.go('/dashboard');
       }
     } catch (_) {}
   }

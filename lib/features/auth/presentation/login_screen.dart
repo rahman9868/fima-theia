@@ -10,13 +10,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final LoginController controller = Get.put(LoginController());
+  late final LoginController controller;
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(LoginController());
+    // Check direct navigation here, passing context
+    controller.checkIsLoggedIn(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF166DB2), // Matches background gradients/shades
+      backgroundColor: const Color(0xFF166DB2),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -41,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 24,
                           color: Color(0xFF444444)),
                     ),
-                    // LOGO IMAGE (adjust path as needed)
                     const SizedBox(height: 18),
                     Image(
                       image: AssetImage('assets/img/logo.png'),
@@ -83,7 +90,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 44),
-
                     TextField(
                       controller: controller.emailController,
                       decoration: InputDecoration(
@@ -131,9 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         contentPadding: const EdgeInsets.symmetric(vertical: 13, horizontal: 14),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
                             color: Colors.grey.shade600,
                           ),
                           onPressed: () {
@@ -184,7 +188,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              // FOOTER
               const SizedBox(height: 30),
               const Text(
                 '@2019 PT Federal International Finance',

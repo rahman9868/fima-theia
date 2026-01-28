@@ -1,7 +1,6 @@
 import '../../domain/repository/auth_repository.dart';
 import '../entity/authentication_tokens.dart';
 import '../../../acl/data/employee_acl_repository_impl.dart';
-import '../../../acl/domain/entity/employee_dto.dart';
 import '../entity/user.dart';
 import '../../../../core/local/hive_service.dart';
 
