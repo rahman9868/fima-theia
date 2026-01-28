@@ -24,7 +24,7 @@ class LoginController extends GetxController {
     final token = await tokenProvider.getAccessToken();
     try {
       final userBox = await Hive.openBox<User>('userBox');
-      final user = userBox.get('profile');
+      final user = userBox.get('user');
       if (token != null && token.isNotEmpty && user != null && context != null) {
         context.go('/dashboard');
       }
