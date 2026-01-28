@@ -18,6 +18,7 @@ class AuthDataSource {
           'password': password,
           'grant_type': 'password',
         },
+      requireAuth: false
       );
 
       if (response != null && response['access_token'] != null) {
