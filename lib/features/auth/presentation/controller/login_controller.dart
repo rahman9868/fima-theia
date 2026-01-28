@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/usecase/login_usecase.dart';
 
+import '../../data/repository/auth_repository_impl.dart';
 class LoginController extends GetxController {
-  final LoginUseCase _loginUseCase = LoginUseCase();
+  final LoginUseCase _loginUseCase = LoginUseCase(AuthRepositoryImpl());
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -15,12 +16,10 @@ class LoginController extends GetxController {
     errorMessage.value = '';
     final email = emailController.text;
     final password = passwordController.text;
-    final result = await _loginUseCase.login(email, password);
+    final (tokens, apiError) = await _loginUseCase.login(email, password);
     isLoading.value = false;
-    final tokens = result.$1;
-    final apiError = result.$2;
     if (tokens != null) {
-      // handle successful login
+      // Session is saved in usecase
       Get.snackbar('Success', 'Login successful!');
     } else {
       errorMessage.value = apiError ?? 'Invalid credentials';
