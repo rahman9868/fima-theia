@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/usecase/login_usecase.dart';
 import '../../data/repository/auth_repository_impl.dart';
 import '../../../acl/data/employee_acl_repository_impl.dart';
@@ -15,7 +16,7 @@ class LoginController extends GetxController {
   var isLoading = false.obs;
   var errorMessage = ''.obs;
 
-  void login() async {
+  void login([BuildContext? context]) async {
     isLoading.value = true;
     errorMessage.value = '';
     final email = emailController.text;
@@ -23,8 +24,8 @@ class LoginController extends GetxController {
     final (user, apiError) = await _loginUseCase.login(email, password);
     isLoading.value = false;
     if (user != null) {
-      // Session (tokens & employeeDto) is already persisted in Hive in the use case
       Get.snackbar('Success', 'Login successful!');
+      if(context != null) context.go('/dashboard');
     } else {
       errorMessage.value = apiError ?? 'Invalid credentials';
       Get.snackbar('Error', errorMessage.value, backgroundColor: Colors.red, colorText: Colors.white);

@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: double.infinity,
                               height: 54,
                               child: ElevatedButton(
-                                onPressed: controller.login,
+                                onPressed: () => controller.login(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFF7B94C),
                                   shadowColor: Colors.black26,
