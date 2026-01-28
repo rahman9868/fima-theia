@@ -5,6 +5,7 @@ import 'features/dashboard/dashboard_screen.dart';
 import 'features/dashboard/about_screen.dart';
 import 'package:get/get.dart';
 
+import 'core/local/hive_service.dart';
 import 'core/services/token_provider.dart';
 
 final GoRouter _router = GoRouter(
