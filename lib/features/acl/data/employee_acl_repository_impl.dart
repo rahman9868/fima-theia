@@ -7,7 +7,7 @@ class EmployeeAclRepositoryImpl implements EmployeeAclRepository {
 
   @override
   Future<EmployeeDto?> fetchAclEmployee({required String accessToken}) async {
-    final json = await dataSource.fetchEmployeeAcl(accessToken: accessToken);
+    final json = await dataSource.fetchEmployeeAcl();
     if (json != null) {
       return EmployeeDto.fromJson(json);
     }

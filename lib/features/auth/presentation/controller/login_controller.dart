@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../domain/usecase/login_usecase.dart';
-
 import '../../data/repository/auth_repository_impl.dart';
+import '../../../acl/data/employee_acl_repository_impl.dart';
+
 class LoginController extends GetxController {
-  final LoginUseCase _loginUseCase = LoginUseCase(AuthRepositoryImpl());
+  final LoginUseCase _loginUseCase = LoginUseCase(
+    AuthRepositoryImpl(),
+    EmployeeAclRepositoryImpl(),
+  );
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -16,10 +20,10 @@ class LoginController extends GetxController {
     errorMessage.value = '';
     final email = emailController.text;
     final password = passwordController.text;
-    final (tokens, apiError) = await _loginUseCase.login(email, password);
+    final (user, apiError) = await _loginUseCase.login(email, password);
     isLoading.value = false;
-    if (tokens != null) {
-      // Session is saved in usecase
+    if (user != null) {
+      // Session (tokens & employeeDto) is already persisted in Hive in the use case
       Get.snackbar('Success', 'Login successful!');
     } else {
       errorMessage.value = apiError ?? 'Invalid credentials';
