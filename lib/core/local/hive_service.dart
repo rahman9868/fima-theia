@@ -10,7 +10,18 @@ class HiveService {
     await Hive.initFlutter();
     Hive.registerAdapter(UserAdapter());
     Hive.registerAdapter(EmployeeDtoAdapter());
-    // If more adapters for nested DTOs are needed, register here
+    Hive.registerAdapter(AccountDtoAdapter());
+    Hive.registerAdapter(RoleDtoAdapter());
+    Hive.registerAdapter(AccessDtoAdapter());
+    Hive.registerAdapter(AssignmentDtoAdapter());
+    Hive.registerAdapter(OrganizationDtoAdapter());
+    Hive.registerAdapter(LocationDtoAdapter());
+    Hive.registerAdapter(OrganizationConfigDtoAdapter());
+    Hive.registerAdapter(WorkingScheduleDtoAdapter());
+    Hive.registerAdapter(LocationDetailDtoAdapter());
+    Hive.registerAdapter(JobDtoAdapter());
+    Hive.registerAdapter(CompanyDtoAdapter());
+    Hive.registerAdapter(JobGroupDtoAdapter());
     await Hive.openBox<User>(userBoxName);
   }
 
