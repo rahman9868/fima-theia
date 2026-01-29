@@ -7,11 +7,80 @@ class EmployeeDto extends HiveObject {
   final AccountDto? account;
   @HiveField(1)
   final AssignmentDto? assignment;
-  EmployeeDto({this.account, this.assignment});
+  @HiveField(2)
+  final int? id;
+  @HiveField(3)
+  final bool? isVip;
+  @HiveField(4)
+  final bool? vipIn;
+  @HiveField(5)
+  final bool? vipOut;
+  @HiveField(6)
+  final String? created;
+  @HiveField(7)
+  final bool? employeeActive;
+  @HiveField(8)
+  final bool? employeeExt;
+  @HiveField(9)
+  final String? modified;
+  @HiveField(10)
+  final List<EmployeeSupervisorDto>? supervisor;
+  @HiveField(11)
+  final String? lastSync;
+  @HiveField(12)
+  final String? syncSource;
+  @HiveField(13)
+  final String? status;
+  @HiveField(14)
+  final bool? useKeycloak;
+  @HiveField(15)
+  final String? lastUpdate;
+
+  EmployeeDto({
+    this.account,
+    this.assignment,
+    this.id,
+    this.isVip,
+    this.vipIn,
+    this.vipOut,
+    this.created,
+    this.employeeActive,
+    this.employeeExt,
+    this.modified,
+    this.supervisor,
+    this.lastSync,
+    this.syncSource,
+    this.status,
+    this.useKeycloak,
+    this.lastUpdate,
+  });
+
   factory EmployeeDto.fromJson(Map<String, dynamic> json) => EmployeeDto(
-    account: json['account'] != null ? AccountDto.fromJson(json['account']) : null,
-    assignment: json['assignment'] != null ? AssignmentDto.fromJson(json['assignment']) : null,
-  );
+        id: json['id'],
+        isVip: json['isVip'],
+        vipIn: json['vipIn'],
+        vipOut: json['vipOut'],
+        account: json['account'] != null
+            ? AccountDto.fromJson(json['account'])
+            : null,
+        assignment: json['assignment'] != null
+            ? AssignmentDto.fromJson(json['assignment'])
+            : null,
+        created: json['created'],
+        employeeActive: json['employeeActive'],
+        employeeExt: json['employeeExt'],
+        modified: json['modified'],
+        supervisor: json['supervisor'] != null
+            ? List<EmployeeSupervisorDto>.from(
+                (json['supervisor'] as List)
+                    .map((x) => EmployeeSupervisorDto.fromJson(x)))
+            : null,
+        lastSync: json['lastSync'],
+        syncSource: json['syncSource'],
+        status: json['status'],
+        useKeycloak: json['useKeycloak'],
+        lastUpdate: json['lastUpdate'],
+      );
 }
 
 @HiveType(typeId: 3)
@@ -291,4 +360,23 @@ class JobGroupDto extends HiveObject {
     jobGroupName: json['jobGroupName'],
     jobGroupCompanyPolicies: json['jobGroupCompanyPolicies'],
   );
+}
+
+@HiveType(typeId: 15)
+class EmployeeSupervisorDto extends HiveObject {
+  @HiveField(0)
+  final String? employeeName;
+  @HiveField(1)
+  final String? employeeNo;
+  @HiveField(2)
+  final int? id;
+
+  EmployeeSupervisorDto({this.employeeName, this.employeeNo, this.id});
+
+  factory EmployeeSupervisorDto.fromJson(Map<String, dynamic> json) =>
+      EmployeeSupervisorDto(
+        employeeName: json['employeeName'],
+        employeeNo: json['employeeNo'],
+        id: json['id'],
+      );
 }

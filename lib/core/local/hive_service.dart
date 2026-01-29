@@ -22,6 +22,7 @@ class HiveService {
     Hive.registerAdapter(JobDtoAdapter());
     Hive.registerAdapter(CompanyDtoAdapter());
     Hive.registerAdapter(JobGroupDtoAdapter());
+    Hive.registerAdapter(EmployeeSupervisorDtoAdapter());
     await Hive.openBox<User>(userBoxName);
   }
 

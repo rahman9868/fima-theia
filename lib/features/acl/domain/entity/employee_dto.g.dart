@@ -19,17 +19,59 @@ class EmployeeDtoAdapter extends TypeAdapter<EmployeeDto> {
     return EmployeeDto(
       account: fields[0] as AccountDto?,
       assignment: fields[1] as AssignmentDto?,
+      id: fields[2] as int?,
+      isVip: fields[3] as bool?,
+      vipIn: fields[4] as bool?,
+      vipOut: fields[5] as bool?,
+      created: fields[6] as String?,
+      employeeActive: fields[7] as bool?,
+      employeeExt: fields[8] as bool?,
+      modified: fields[9] as String?,
+      supervisor: (fields[10] as List?)?.cast<EmployeeSupervisorDto>(),
+      lastSync: fields[11] as String?,
+      syncSource: fields[12] as String?,
+      status: fields[13] as String?,
+      useKeycloak: fields[14] as bool?,
+      lastUpdate: fields[15] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, EmployeeDto obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.account)
       ..writeByte(1)
-      ..write(obj.assignment);
+      ..write(obj.assignment)
+      ..writeByte(2)
+      ..write(obj.id)
+      ..writeByte(3)
+      ..write(obj.isVip)
+      ..writeByte(4)
+      ..write(obj.vipIn)
+      ..writeByte(5)
+      ..write(obj.vipOut)
+      ..writeByte(6)
+      ..write(obj.created)
+      ..writeByte(7)
+      ..write(obj.employeeActive)
+      ..writeByte(8)
+      ..write(obj.employeeExt)
+      ..writeByte(9)
+      ..write(obj.modified)
+      ..writeByte(10)
+      ..write(obj.supervisor)
+      ..writeByte(11)
+      ..write(obj.lastSync)
+      ..writeByte(12)
+      ..write(obj.syncSource)
+      ..writeByte(13)
+      ..write(obj.status)
+      ..writeByte(14)
+      ..write(obj.useKeycloak)
+      ..writeByte(15)
+      ..write(obj.lastUpdate);
   }
 
   @override
@@ -606,6 +648,46 @@ class JobGroupDtoAdapter extends TypeAdapter<JobGroupDto> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is JobGroupDtoAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class EmployeeSupervisorDtoAdapter extends TypeAdapter<EmployeeSupervisorDto> {
+  @override
+  final int typeId = 15;
+
+  @override
+  EmployeeSupervisorDto read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return EmployeeSupervisorDto(
+      employeeName: fields[0] as String?,
+      employeeNo: fields[1] as String?,
+      id: fields[2] as int?,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, EmployeeSupervisorDto obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.employeeName)
+      ..writeByte(1)
+      ..write(obj.employeeNo)
+      ..writeByte(2)
+      ..write(obj.id);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EmployeeSupervisorDtoAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
