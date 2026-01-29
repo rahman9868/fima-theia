@@ -66,45 +66,33 @@ class DashboardScreen extends StatelessWidget {
           );
         }
 
-        final summary = controller.attendanceSummary.value;
-        if (summary == null || summary.data == null || summary.data!.isEmpty) {
+        final summary = controller.summary.value;
+        if (summary == null) {
           return const Center(
             child: Text('No attendance data'),
           );
         }
 
-        final data = summary.data!.first;
-        final events = data.event ?? [];
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Attendance for ${data.month}/${data.year} (Employee ${data.employeeId})',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Working days: ${summary.workingDays}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final e = events[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      child: Text(e.day.toString()),
-                    ),
-                    title: Text('Day ${e.day}'),
-                    subtitle: Text('Event: ${e.eventType}'),
-                  );
-                },
-              ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text('On time: ${summary.onTime}'),
+              Text('Late: ${summary.late}'),
+              Text('Absent: ${summary.absent}'),
+              Text('Business trip: ${summary.businessTrip}'),
+              Text('Leave: ${summary.leave}'),
+              Text('Pending: ${summary.pending}'),
+              const SizedBox(height: 12),
+              Text('Last update: ${summary.lastUpdate}'),
+            ],
+          ),
         );
       }),
     );
