@@ -181,13 +181,17 @@ class _DashboardItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
+        SizedBox(
+          width: 48,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
           ),
         ),
       ],
     );
   }
-}
+  }
