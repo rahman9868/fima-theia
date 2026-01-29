@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive/hive.dart';
+
 import '../../../auth/domain/entity/user.dart';
 import '../../domain/usecase/login_usecase.dart';
 import '../../data/repository/auth_repository_impl.dart';
 import '../../../acl/data/employee_acl_repository_impl.dart';
 import '../../../../core/services/token_provider.dart';
+import '../../../../core/routes/app_routes.dart';
 
 class LoginController extends GetxController {
   final LoginUseCase _loginUseCase = LoginUseCase(
@@ -26,7 +28,7 @@ class LoginController extends GetxController {
       final userBox = await Hive.openBox<User>('userBox');
       final user = userBox.get('user');
       if (token != null && token.isNotEmpty && user != null && context != null) {
-        context.go('/dashboard');
+        context.go(AppRoutes.dashboard);
       }
     } catch (_) {}
   }
@@ -40,10 +42,15 @@ class LoginController extends GetxController {
     isLoading.value = false;
     if (user != null) {
       Get.snackbar('Success', 'Login successful!');
-      if(context != null) context.go('/dashboard');
+      if (context != null) context.go(AppRoutes.dashboard);
     } else {
       errorMessage.value = apiError ?? 'Invalid credentials';
-      Get.snackbar('Error', errorMessage.value, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        errorMessage.value,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 
