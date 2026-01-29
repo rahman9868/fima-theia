@@ -22,6 +22,10 @@ class DashboardController extends GetxController {
     _loadAttendanceSummary();
   }
 
+  Future<void> refreshSummary() async {
+    await _loadAttendanceSummary();
+  }
+
   Future<void> _loadAttendanceSummary() async {
     isLoading.value = true;
     errorMessage.value = '';

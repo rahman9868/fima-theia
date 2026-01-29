@@ -16,8 +16,14 @@ class DashboardScreen extends StatelessWidget {
         title: const Text('Dashboard'),
       ),
       drawer: const AppDrawer(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        final summary = controller.summary.value;
+
+        if (controller.isLoading.value && summary == null) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -27,38 +33,156 @@ class DashboardScreen extends StatelessWidget {
           );
         }
 
-        final summary = controller.summary.value;
-        if (summary == null) {
-          return const Center(
-            child: Text('No attendance data'),
-          );
-        }
+        final workingDays = summary?.workingDays ?? 0;
+        final onTime = summary?.onTime ?? 0;
+        final late = summary?.late ?? 0;
+        final absent = summary?.absent ?? 0;
+        final businessTrip = summary?.businessTrip ?? 0;
+        final leave = summary?.leave ?? 0;
+        final pending = summary?.pending ?? 0;
+        final lastUpdate = summary?.lastUpdate ?? '-';
 
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Working days: ${summary.workingDays}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+        return RefreshIndicator(
+          onRefresh: controller.refreshSummary,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    'Last Update : $lastUpdate',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Please Pull to Refresh',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 12,
+                      ),
+                      child: Column(
+                        children: [
+                          _DashboardItem(
+                            color: Colors.blue,
+                            label: 'Working Days',
+                            value: workingDays.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.green,
+                            label: 'On-Time',
+                            value: onTime.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.orange,
+                            label: 'Late',
+                            value: late.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.red,
+                            label: 'Absent',
+                            value: absent.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.indigo,
+                            label: 'Business Trip',
+                            value: businessTrip.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.purple,
+                            label: 'Leave',
+                            value: leave.toString(),
+                          ),
+                          const SizedBox(height: 12),
+                          _DashboardItem(
+                            color: Colors.deepOrange,
+                            label: 'Pending',
+                            value: pending.toString(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text('On time: ${summary.onTime}'),
-              Text('Late: ${summary.late}'),
-              Text('Absent: ${summary.absent}'),
-              Text('Business trip: ${summary.businessTrip}'),
-              Text('Leave: ${summary.leave}'),
-              Text('Pending: ${summary.pending}'),
-              const SizedBox(height: 12),
-              Text('Last update: ${summary.lastUpdate}'),
-            ],
+            ),
           ),
         );
       }),
+    );
+  }
+}
+
+class _DashboardItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+
+  const _DashboardItem({
+    required this.color,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.bookmark,
+          color: color,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color(0xFF1565C0),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          ':',
+          style: TextStyle(
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }
