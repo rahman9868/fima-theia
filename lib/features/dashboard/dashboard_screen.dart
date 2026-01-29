@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/widgets/app_drawer.dart';
 import 'presentation/controller/dashboard_controller.dart';
@@ -40,7 +41,11 @@ class DashboardScreen extends StatelessWidget {
         final businessTrip = summary?.businessTrip ?? 0;
         final leave = summary?.leave ?? 0;
         final pending = summary?.pending ?? 0;
-        final lastUpdate = summary?.lastUpdate ?? '-';
+
+        final DateTime? lastUpdatedAt = controller.lastUpdatedAt.value;
+        final String lastUpdate = lastUpdatedAt != null
+            ? DateFormat('yyyy-MM-dd, HH:mm:ss').format(lastUpdatedAt)
+            : '-';
 
         return RefreshIndicator(
           onRefresh: controller.refreshSummary,
