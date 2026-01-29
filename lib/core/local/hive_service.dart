@@ -5,6 +5,7 @@ import '../../features/acl/domain/entity/employee_dto.dart';
 
 class HiveService {
   static const String userBoxName = 'userBox';
+  static const String dashboardSummaryBoxName = 'dashboardSummaryBox';
 
   static Future<void> init() async {
     await Hive.initFlutter();
@@ -24,6 +25,7 @@ class HiveService {
     Hive.registerAdapter(JobGroupDtoAdapter());
     Hive.registerAdapter(EmployeeSupervisorDtoAdapter());
     await Hive.openBox<User>(userBoxName);
+    await Hive.openBox<Map>(dashboardSummaryBoxName);
   }
 
   static Future<void> saveUser(User user) async {
@@ -39,5 +41,28 @@ class HiveService {
   static Future<void> deleteUser() async {
     final box = Hive.box<User>(userBoxName);
     await box.delete('user');
+  }
+
+  static Future<void> saveDashboardSummary(Map<String, dynamic> data) async {
+    final box = Hive.box<Map>(dashboardSummaryBoxName);
+    await box.put('summary', data);
+  }
+
+  static Map<String, dynamic>? getDashboardSummary() {
+    if (!Hive.isBoxOpen(dashboardSummaryBoxName)) {
+      return null;
+    }
+    final box = Hive.box<Map>(dashboardSummaryBoxName);
+    final raw = box.get('summary');
+    if (raw == null) return null;
+    return Map<String, dynamic>.from(raw);
+  }
+
+  static Future<void> clearDashboardSummary() async {
+    if (!Hive.isBoxOpen(dashboardSummaryBoxName)) {
+      return;
+    }
+    final box = Hive.box<Map>(dashboardSummaryBoxName);
+    await box.delete('summary');
   }
 }
