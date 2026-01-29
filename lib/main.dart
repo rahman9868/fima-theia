@@ -43,7 +43,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Clean Architecture Login',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF166DB2)),
+        primaryColor: const Color(0xFF166DB2),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF166DB2),
+          foregroundColor: Colors.white,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF166DB2),
+          foregroundColor: Colors.white,
+        ),
       ),
       routerConfig: _router,
     );
