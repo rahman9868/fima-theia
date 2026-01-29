@@ -27,10 +27,10 @@ class DashboardController extends GetxController {
   }
 
   Future<void> refreshSummary() async {
-    await loadDashboardSummary(forceRefresh: true);
+    await loadDashboardSummary();
   }
 
-  Future<void> loadDashboardSummary({bool forceRefresh = false}) async {
+  Future<void> loadDashboardSummary() async {
     isLoading.value = true;
     errorMessage.value = '';
 
@@ -38,26 +38,36 @@ class DashboardController extends GetxController {
       final cached = _readCachedSummary();
       final now = DateTime.now();
 
-      if (!forceRefresh && cached != null) {
-        debugPrint('[DashboardController] Using cached dashboard summary from local storage. lastUpdatedAt=${cached.lastUpdatedAt.toIso8601String()}');
+      if (cached != null) {
+        debugPrint(
+          '[DashboardController] Using cached dashboard summary from local storage. '
+          'lastUpdatedAt=${cached.lastUpdatedAt.toIso8601String()}',
+        );
 
         summary.value = cached.summary;
         lastUpdatedAt.value = cached.lastUpdatedAt;
 
         final isFresh = now.difference(cached.lastUpdatedAt) < _cacheValidity;
         if (isFresh) {
-          debugPrint('[DashboardController] Cached dashboard summary is fresh. Skipping API call.');
+          debugPrint(
+            '[DashboardController] Cached dashboard summary is fresh. Skipping API call.',
+          );
           return;
         }
 
-        debugPrint('[DashboardController] Cached dashboard summary is stale. Refreshing from API.');
+        debugPrint(
+          '[DashboardController] Cached dashboard summary is stale. Refreshing from API.',
+        );
 
         final fresh = await _fetchSummaryFromApi();
         if (fresh != null) {
           await _cacheSummary(fresh);
           final refreshed = _readCachedSummary();
           if (refreshed != null) {
-            debugPrint('[DashboardController] Local dashboard summary updated after API refresh. lastUpdatedAt=${refreshed.lastUpdatedAt.toIso8601String()}');
+            debugPrint(
+              '[DashboardController] Local dashboard summary updated after API refresh. '
+              'lastUpdatedAt=${refreshed.lastUpdatedAt.toIso8601String()}',
+            );
             summary.value = refreshed.summary;
             lastUpdatedAt.value = refreshed.lastUpdatedAt;
           }
@@ -65,14 +75,19 @@ class DashboardController extends GetxController {
         return;
       }
 
-      debugPrint('[DashboardController] No valid cached dashboard summary. Fetching from API.');
+      debugPrint(
+        '[DashboardController] No cached dashboard summary found. Fetching from API.',
+      );
 
       final fresh = await _fetchSummaryFromApi();
       if (fresh != null) {
         await _cacheSummary(fresh);
         final refreshed = _readCachedSummary();
         if (refreshed != null) {
-          debugPrint('[DashboardController] Local dashboard summary created/updated from API. lastUpdatedAt=${refreshed.lastUpdatedAt.toIso8601String()}');
+          debugPrint(
+            '[DashboardController] Local dashboard summary created/updated from API. '
+            'lastUpdatedAt=${refreshed.lastUpdatedAt.toIso8601String()}',
+          );
           summary.value = refreshed.summary;
           lastUpdatedAt.value = refreshed.lastUpdatedAt;
         }
@@ -99,7 +114,10 @@ class DashboardController extends GetxController {
       }
 
       final now = DateTime.now();
-      debugPrint('[DashboardController] Fetching attendance summary for employeeId=$employeeId, year=${now.year}, month=${now.month}');
+      debugPrint(
+        '[DashboardController] Fetching attendance summary for employeeId=$employeeId, '
+        'year=${now.year}, month=${now.month}',
+      );
 
       final result = await _getAttendanceSummaryUseCase.execute(
         employeeId: employeeId,
@@ -187,7 +205,8 @@ class DashboardController extends GetxController {
 
     final lastEvent = events.last;
     final lastDate = DateTime(year, month, lastEvent.day);
-    final formattedLastUpdate = DateFormat('yyyy-MM-dd, HH:mm:ss').format(lastDate);
+    final formattedLastUpdate =
+        DateFormat('yyyy-MM-dd, HH:mm:ss').format(lastDate);
 
     debugPrint('[DashboardController] Summary computed: '
         'workingDays=$workingDays, onTime=$onTime, late=$late, absent=$absent, '
@@ -220,7 +239,10 @@ class DashboardController extends GetxController {
       'lastUpdatedAt': now.toIso8601String(),
     };
 
-    debugPrint('[DashboardController] Saving dashboard summary to local storage. lastUpdatedAt=${data['lastUpdatedAt']}');
+    debugPrint(
+      '[DashboardController] Saving dashboard summary to local storage. '
+      'lastUpdatedAt=${data['lastUpdatedAt']}',
+    );
 
     await HiveService.saveDashboardSummary(data);
   }
@@ -251,7 +273,10 @@ class DashboardController extends GetxController {
         lastUpdate: (raw['lastUpdate'] as String?) ?? '',
       );
 
-      debugPrint('[DashboardController] Cached dashboard summary loaded from local storage. lastUpdatedAt=$lastUpdatedIso');
+      debugPrint(
+        '[DashboardController] Cached dashboard summary loaded from local storage. '
+        'lastUpdatedAt=$lastUpdatedIso',
+      );
 
       return _CachedSummary(summary: summary, lastUpdatedAt: lastUpdatedAt);
     } catch (e, stack) {
