@@ -14,8 +14,8 @@ class AttendanceRemoteDataSource {
       return data.map((e) => AttendanceEvent(
         date: DateTime.parse(e['date']),
         type: AttendanceEventType.values.firstWhere(
-          (t) => t.name.toUpperCase() == (e['status'] as String).toUpperCase(),
-          orElse: () => AttendanceEventType.present,
+          (t) => t.value == (e['status'] as String),
+          orElse: () => AttendanceEventType.working,
         ),
         description: e['description'],
       )).toList();

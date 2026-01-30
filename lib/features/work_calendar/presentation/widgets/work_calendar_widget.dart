@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import '../../domain/entity/attendance_event.dart';
 
 final Map<AttendanceEventType, Color> eventTypeColor = {
-  AttendanceEventType.present: Colors.green,
+  AttendanceEventType.late: Colors.deepOrange,
+  AttendanceEventType.onTime: Colors.green,
   AttendanceEventType.absent: Colors.red,
-  AttendanceEventType.holiday: Colors.blue,
-  AttendanceEventType.sick: Colors.orange,
-  AttendanceEventType.remote: Colors.purple,
+  AttendanceEventType.pending: Colors.grey,
+  AttendanceEventType.working: Colors.blue,
+  AttendanceEventType.business: Colors.teal,
+  AttendanceEventType.leave: Colors.purple,
+  AttendanceEventType.holiday: Colors.yellow.shade700,
 };
 
-/// Mocked demo events for the calendar
+// Optionally remove mockAttendance for production!
 List<AttendanceEvent> mockAttendance = [
-  AttendanceEvent(date: DateTime.now().subtract(Duration(days: 1)), type: AttendanceEventType.present),
-  AttendanceEvent(date: DateTime.now(), type: AttendanceEventType.remote),
-  AttendanceEvent(date: DateTime.now().add(Duration(days: 1)), type: AttendanceEventType.absent),
-  AttendanceEvent(date: DateTime.now().add(Duration(days: 5)), type: AttendanceEventType.holiday),
-  AttendanceEvent(date: DateTime.now().add(Duration(days: 7)), type: AttendanceEventType.sick),
+  AttendanceEvent(date: DateTime.now().subtract(const Duration(days: 1)), type: AttendanceEventType.onTime),
+  AttendanceEvent(date: DateTime.now(), type: AttendanceEventType.business),
+  AttendanceEvent(date: DateTime.now().add(const Duration(days: 1)), type: AttendanceEventType.absent),
+  AttendanceEvent(date: DateTime.now().add(const Duration(days: 5)), type: AttendanceEventType.late),
+  AttendanceEvent(date: DateTime.now().add(const Duration(days: 7)), type: AttendanceEventType.leave),
 ];
 
 class WorkCalendarWidget extends StatelessWidget {
@@ -27,44 +30,49 @@ class WorkCalendarWidget extends StatelessWidget {
     DateTime now = DateTime.now();
     DateTime previousMonth = DateTime(now.year, now.month - 1);
     DateTime nextMonth = DateTime(now.year, now.month + 1);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CalendarMonth(
-          label: _monthLabel(previousMonth),
-          year: previousMonth.year,
-          month: previousMonth.month,
-          attendanceEvents: attendanceEvents,
-        ),
-        CalendarMonth(
-          label: _monthLabel(now),
-          year: now.year,
-          month: now.month,
-          attendanceEvents: attendanceEvents,
-        ),
-        CalendarMonth(
-          label: _monthLabel(nextMonth),
-          year: nextMonth.year,
-          month: nextMonth.month,
-          attendanceEvents: attendanceEvents,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: AttendanceEventType.values.map((type) => _legend(type)).toList(),
-        ),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CalendarMonth(
+            label: _monthLabel(previousMonth),
+            year: previousMonth.year,
+            month: previousMonth.month,
+            attendanceEvents: attendanceEvents,
+          ),
+          CalendarMonth(
+            label: _monthLabel(now),
+            year: now.year,
+            month: now.month,
+            attendanceEvents: attendanceEvents,
+          ),
+          CalendarMonth(
+            label: _monthLabel(nextMonth),
+            year: nextMonth.year,
+            month: nextMonth.month,
+            attendanceEvents: attendanceEvents,
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            children: AttendanceEventType.values.map((type) => _legend(type)).toList(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _legend(AttendanceEventType type) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 14, height: 14,
-          margin: EdgeInsets.symmetric(horizontal: 4),
-          color: eventTypeColor[type],
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          color: eventTypeColor[type] ?? Colors.grey,
         ),
-        Text(type.name),
+        Text(type.value),
       ],
     );
   }
@@ -89,24 +97,25 @@ class CalendarMonth extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         ),
         GridView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
           itemCount: daysCount,
           itemBuilder: (context, index) {
             final date = DateTime(year, month, index + 1);
             final event = attendanceEvents.firstWhere(
               (ev) => ev.date.year == year && ev.date.month == month && ev.date.day == index + 1,
-              orElse: () => AttendanceEvent(date: date, type: AttendanceEventType.present),
+              orElse: () => AttendanceEvent(date: date, type: AttendanceEventType.working),
             );
+            final color = eventTypeColor[event.type] ?? Colors.grey;
             return Container(
-              margin: EdgeInsets.all(2),
+              margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: eventTypeColor[event.type]!.withOpacity(0.3),
-                border: Border.all(color: eventTypeColor[event.type]!, width: 1),
+                color: color.withOpacity(0.3),
+                border: Border.all(color: color, width: 1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Center(child: Text('${index + 1}')),

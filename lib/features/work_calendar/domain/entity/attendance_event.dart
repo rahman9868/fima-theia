@@ -1,9 +1,15 @@
 enum AttendanceEventType {
-  present,
-  absent,
-  holiday,
-  sick,
-  remote,
+  late('LATE'),
+  onTime('ON_TIME'),
+  absent('ABSENT'),
+  pending('PENDING'),
+  working('WORKING'),
+  business('BUSINESS'),
+  leave('LEAVE'),
+  holiday('HOLIDAY');
+
+  final String value;
+  const AttendanceEventType(this.value);
 }
 
 class AttendanceEvent {
