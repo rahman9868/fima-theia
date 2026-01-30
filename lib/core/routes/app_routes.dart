@@ -4,4 +4,5 @@ class AppRoutes {
   static const String login = '/';
   static const String dashboard = '/dashboard';
   static const String about = '/about';
+  static const String workCalendar = '/work-calendar';
 }
