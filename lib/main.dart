@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-
 import 'core/local/hive_service.dart';
 import 'core/routes/app_routes.dart';
 import 'core/services/token_provider.dart';
