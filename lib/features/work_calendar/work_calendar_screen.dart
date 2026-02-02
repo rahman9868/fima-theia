@@ -94,8 +94,11 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
               calendarFormat: CalendarFormat.month,
               startingDayOfWeek: StartingDayOfWeek.sunday,
               headerVisible: false,
+              sixWeekMonthsEnforced: true,
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
+                  final inMonth = date.month == focusedDay.month;
+                  if (!inMonth) return const SizedBox.shrink();
                   final att = controller.attendances[date];
                   if (att == null || att.status == AttendanceEventType.unknown) return const SizedBox.shrink();
                   Color iconColor;
@@ -145,34 +148,37 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                   );
                 },
                 todayBuilder: (context, date, _) {
+                  final inMonth = date.month == focusedDay.month;
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
+                      color: inMonth ? Colors.blue.shade100 : Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
-                      child: Text('${date.day}', style: const TextStyle(color: Colors.black)),
+                      child: Text('${date.day}', style: TextStyle(color: inMonth ? Colors.black : Colors.grey[400])),
                     ),
                   );
                 },
                 selectedBuilder: (context, date, _) {
+                  final inMonth = date.month == focusedDay.month;
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade100,
+                      color: inMonth ? Colors.blue.shade100 : Colors.transparent,
                       shape: BoxShape.circle,
                     ),
                     child: Center(
-                      child: Text('${date.day}', style: const TextStyle(color: Colors.black)),
+                      child: Text('${date.day}', style: TextStyle(color: inMonth ? Colors.black : Colors.grey[400])),
                     ),
                   );
                 },
               ),
               eventLoader: (date) {
+                final inMonth = date.month == focusedDay.month;
                 final att = controller.attendances[date];
-                if (att != null && att.status != AttendanceEventType.unknown) return [att];
+                if (inMonth && att != null && att.status != AttendanceEventType.unknown) return [att];
                 return [];
               },
-              onPageChanged: (_) {}, // handled with custom nav
+              onPageChanged: (_) {},
             ),
           ],
         );
