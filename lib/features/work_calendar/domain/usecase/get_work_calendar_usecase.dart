@@ -1,15 +1,15 @@
 import '../entity/attendance.dart';
 import '../repository/attendance_repository.dart';
 
-class GetWorkCalendarUsecase {
+class GetThreeMonthWorkCalendarUsecase {
   final AttendanceRepository repository;
-  GetWorkCalendarUsecase({required this.repository});
+  GetThreeMonthWorkCalendarUsecase({required this.repository});
 
   Future<List<Attendance>> call({
     required String employeeId,
     required int year,
     required int month,
   }) async {
-    return repository.getWorkCalendar(employeeId: employeeId, year: year, month: month);
+    return repository.getThreeMonthWorkCalendar(employeeId: employeeId, year: year, month: month);
   }
 }

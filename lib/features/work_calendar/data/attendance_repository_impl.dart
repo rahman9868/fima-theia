@@ -6,13 +6,14 @@ import 'attendance_remote_data_source.dart';
 class AttendanceRepositoryImpl implements AttendanceRepository {
   final AttendanceRemoteDataSource remoteDataSource;
   AttendanceRepositoryImpl({required this.remoteDataSource});
+
   @override
-  Future<List<Attendance>> getWorkCalendar({
+  Future<List<Attendance>> getThreeMonthWorkCalendar({
     required String employeeId,
     required int year,
     required int month,
   }) async {
-    final result = await remoteDataSource.getWorkCalendar(employeeId: employeeId, year: year, month: month);
+    final result = await remoteDataSource.getThreeMonthWorkCalendar(employeeId: employeeId, year: year, month: month);
     return result.map((e) => e.toEntity()).toList();
   }
 }

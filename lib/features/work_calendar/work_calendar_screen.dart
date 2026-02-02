@@ -12,7 +12,6 @@ class WorkCalendarScreen extends StatefulWidget {
 }
 
 class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
-  // Holds previous, current, next months in order
   late List<DateTime> _months;
   late int _currentMonthIndex;
   final controller = Get.find<WorkCalendarController>();
@@ -26,9 +25,9 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
       DateTime(now.year, now.month),
       DateTime(now.year, now.month + 1),
     ];
-    _currentMonthIndex = 1; // Start at current month
-    // Only load once
-    controller.loadCalendars(_months);
+    _currentMonthIndex = 1;
+    // Only ONE call to load all three months' data!
+    controller.loadThreeMonthCalendar(now.year, now.month);
   }
 
   void _goToPrevMonth() {
@@ -149,7 +148,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                 if (att != null) return [att];
                 return [];
               },
-              onPageChanged: (_) {}, // no-op
+              onPageChanged: (_) {}, // handled with custom nav
             ),
           ],
         );

@@ -2,7 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../model/attendance_model.dart';
 
 abstract class AttendanceRemoteDataSource {
-  Future<List<AttendanceModel>> getWorkCalendar({
+  Future<List<AttendanceModel>> getThreeMonthWorkCalendar({
     required String employeeId,
     required int year,
     required int month,
@@ -14,7 +14,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
   AttendanceRemoteDataSourceImpl({required this.apiClient});
 
   @override
-  Future<List<AttendanceModel>> getWorkCalendar({
+  Future<List<AttendanceModel>> getThreeMonthWorkCalendar({
     required String employeeId,
     required int year,
     required int month,
