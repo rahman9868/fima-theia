@@ -26,7 +26,6 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
       DateTime(now.year, now.month + 1),
     ];
     _currentMonthIndex = 1;
-    // Only ONE call to load all three months' data!
     controller.loadThreeMonthCalendar(now.year, now.month);
   }
 
@@ -98,7 +97,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
                   final att = controller.attendances[date];
-                  if (att == null || att.status == AttendanceEventType.unknown) return null;
+                  if (att == null || att.status == AttendanceEventType.unknown) return const SizedBox.shrink();
                   Color iconColor;
                   switch (att.status) {
                     case AttendanceEventType.late:
@@ -124,7 +123,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                       break;
                     case AttendanceEventType.unknown:
                     default:
-                      return null;
+                      return const SizedBox.shrink();
                   }
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -170,7 +169,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
               ),
               eventLoader: (date) {
                 final att = controller.attendances[date];
-                if (att != null) return [att];
+                if (att != null && att.status != AttendanceEventType.unknown) return [att];
                 return [];
               },
               onPageChanged: (_) {}, // handled with custom nav
