@@ -98,9 +98,34 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
                   final att = controller.attendances[date];
-                  if (att == null) return null;
-                  Color iconColor = Colors.red;
-                  if (att.status == AttendanceEventType.late) iconColor = Colors.orange;
+                  if (att == null || att.status == AttendanceEventType.unknown) return null;
+                  Color iconColor;
+                  switch (att.status) {
+                    case AttendanceEventType.late:
+                      iconColor = Colors.yellow;
+                      break;
+                    case AttendanceEventType.present:
+                      iconColor = Colors.green;
+                      break;
+                    case AttendanceEventType.pending:
+                      iconColor = Colors.orange;
+                      break;
+                    case AttendanceEventType.leave:
+                      iconColor = Colors.blue;
+                      break;
+                    case AttendanceEventType.businessTrip:
+                      iconColor = Colors.purple;
+                      break;
+                    case AttendanceEventType.working:
+                      iconColor = Colors.white;
+                      break;
+                    case AttendanceEventType.absent:
+                      iconColor = Colors.red;
+                      break;
+                    case AttendanceEventType.unknown:
+                    default:
+                      return null;
+                  }
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
