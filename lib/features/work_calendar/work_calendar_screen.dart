@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:get/get.dart';
 import '../work_calendar/domain/entity/attendance_event_type.dart';
 import '../work_calendar/presentation/work_calendar_controller.dart';
+import 'package:intl/intl.dart';
 
 class WorkCalendarScreen extends StatefulWidget {
   const WorkCalendarScreen({super.key});
@@ -11,115 +12,14 @@ class WorkCalendarScreen extends StatefulWidget {
 }
 
 class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
-  late DateTime _currentMonth;
-  late List<DateTime> _monthsToShow;
+  late DateTime _focusedDay;
   final controller = Get.find<WorkCalendarController>();
 
   @override
   void initState() {
     super.initState();
-    _currentMonth = DateTime(DateTime.now().year, DateTime.now().month);
-    _monthsToShow = [
-      DateTime(_currentMonth.year, _currentMonth.month - 1),
-      _currentMonth,
-      DateTime(_currentMonth.year, _currentMonth.month + 1),
-    ];
-    controller.loadCalendars(_monthsToShow);
-  }
-
-  Color eventColor(AttendanceEventType type) {
-    switch (type) {
-      case AttendanceEventType.present:
-        return Colors.green;
-      case AttendanceEventType.absent:
-        return Colors.red;
-      case AttendanceEventType.late:
-        return Colors.orange;
-      case AttendanceEventType.holiday:
-        return Colors.blueGrey;
-      case AttendanceEventType.leave:
-        return Colors.purple;
-      case AttendanceEventType.unknown:
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Widget buildCalendar(DateTime month) {
-    final int daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    final firstWeekday = DateTime(month.year, month.month, 1).weekday;
-    List<Widget> dayWidgets = [];
-    for (int i = 1; i < firstWeekday; i++) {
-      dayWidgets.add(const SizedBox.shrink());
-    }
-    for (int day = 1; day <= daysInMonth; day++) {
-      final date = DateTime(month.year, month.month, day);
-      dayWidgets.add(Obx(() {
-        final attendance = controller.attendances[date];
-        return Tooltip(
-          message: attendance?.status.label ?? 'No data',
-          child: Container(
-            margin: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: attendance != null ? eventColor(attendance.status) : Colors.grey[200],
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                '$day',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: attendance != null && (attendance.status == AttendanceEventType.holiday || attendance.status == AttendanceEventType.absent)
-                      ? Colors.white
-                      : Colors.black,
-                ),
-              ),
-            ),
-          ),
-        );
-      }));
-    }
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Text(DateFormat.yMMMM().format(month), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            GridView.count(
-              crossAxisCount: 7,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: dayWidgets,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildLegend() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: AttendanceEventType.values
-            .where((t) => t != AttendanceEventType.unknown)
-            .map((type) => Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: eventColor(type),
-                      radius: 8,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(type.label),
-                  ],
-                ))
-            .toList(),
-      ),
-    );
+    _focusedDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    controller.loadCalendars([_focusedDay]);
   }
 
   @override
@@ -134,10 +34,89 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
         } else if (controller.error.isNotEmpty) {
           return Center(child: Text(controller.error.value));
         }
-        return ListView(
+        return Column(
           children: [
-            buildLegend(),
-            ..._monthsToShow.map((m) => buildCalendar(m)),
+            TableCalendar(
+              firstDay: DateTime.utc(2000, 1, 1),
+              lastDay: DateTime.utc(2100, 12, 31),
+              focusedDay: _focusedDay,
+              locale: 'id_ID',
+              calendarFormat: CalendarFormat.month,
+              startingDayOfWeek: StartingDayOfWeek.sunday,
+              headerStyle: const HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                leftChevronIcon: Icon(Icons.chevron_left),
+                rightChevronIcon: Icon(Icons.chevron_right),
+              ),
+              calendarBuilders: CalendarBuilders(
+                markerBuilder: (context, date, events) {
+                  final att = controller.attendances[date];
+                  if (att == null) return null;
+                  // Red for absent, orange for late
+                  Color iconColor = Colors.red;
+                  if (att.status == AttendanceEventType.late) iconColor = Colors.orange;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(Icons.bookmark, color: iconColor, size: 16),
+                    ],
+                  );
+                },
+                defaultBuilder: (context, date, _) {
+                  final inMonth = date.month == _focusedDay.month;
+                  return Center(
+                    child: Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        color: inMonth ? Colors.black : Colors.grey[400],
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                  );
+                },
+                todayBuilder: (context, date, _) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text('${date.day}', style: const TextStyle(color: Colors.black)),
+                    ),
+                  );
+                },
+                selectedBuilder: (context, date, _) {
+                  // Same as today
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade100,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text('${date.day}', style: const TextStyle(color: Colors.black)),
+                    ),
+                  );
+                },
+              ),
+              onPageChanged: (date) {
+                setState(() {
+                  _focusedDay = DateTime(date.year, date.month, 1);
+                });
+                controller.loadCalendars([_focusedDay]);
+              },
+              calendarStyle: CalendarStyle(
+                markersAlignment: Alignment.bottomCenter,
+                markersMaxCount: 1,
+                markerSize: 16,
+                weekendTextStyle: const TextStyle(color: Colors.black),
+              ),
+              eventLoader: (date) {
+                final att = controller.attendances[date];
+                if (att != null) return [att];
+                return [];
+              },
+            ),
           ],
         );
       }),
