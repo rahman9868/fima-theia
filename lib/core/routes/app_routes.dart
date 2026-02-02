@@ -5,4 +5,5 @@ class AppRoutes {
   static const String dashboard = '/dashboard';
   static const String about = '/about';
   static const String workCalendar = '/work-calendar';
+  static const String workCalendarDetail = '/work-calendar/detail';
 }

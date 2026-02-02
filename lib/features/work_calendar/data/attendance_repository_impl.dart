@@ -1,6 +1,7 @@
 import '../../work_calendar/domain/entity/attendance.dart';
 import '../../work_calendar/domain/repository/attendance_repository.dart';
 import '../model/attendance_model.dart';
+import '../model/attendance_detail_model.dart';
 import 'attendance_remote_data_source.dart';
 
 class AttendanceRepositoryImpl implements AttendanceRepository {
@@ -15,5 +16,15 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
   }) async {
     final result = await remoteDataSource.getThreeMonthWorkCalendar(employeeId: employeeId, year: year, month: month);
     return result.map((e) => e.toEntity()).toList();
+  }
+
+  @override
+  Future<AttendanceDetailModel> getAttendanceDetail({
+    required String employeeId,
+    required int year,
+    required int month,
+    required int day,
+  }) {
+    return remoteDataSource.getAttendanceDetail(employeeId: employeeId, year: year, month: month, day: day);
   }
 }

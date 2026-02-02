@@ -1,3 +1,4 @@
+import 'features/work_calendar/attendance_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +34,14 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: AppRoutes.workCalendar,
       builder: (context, state) => const WorkCalendarScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.workCalendarDetail,
+      builder: (context, state) {
+        final dateParam = state.pathParameters['date']!;
+        final date = DateTime.parse(dateParam);
+        return AttendanceDetailPage(date: date);
+      },
     ),
     ],
     );
