@@ -12,33 +12,46 @@ class WorkCalendarScreen extends StatefulWidget {
 }
 
 class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
-  late DateTime _focusedDay;
-  late DateTime _prevMonth;
-  late DateTime _nextMonth;
+  // Holds previous, current, next months in order
+  late List<DateTime> _months;
+  late int _currentMonthIndex;
   final controller = Get.find<WorkCalendarController>();
 
   @override
   void initState() {
     super.initState();
-    _focusedDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    _prevMonth = DateTime(_focusedDay.year, _focusedDay.month - 1);
-    _nextMonth = DateTime(_focusedDay.year, _focusedDay.month + 1);
-    // Load previous, current, and next month only once
-    controller.loadCalendars([
-      _prevMonth,
-      _focusedDay,
-      _nextMonth
-    ]);
+    final now = DateTime.now();
+    _months = [
+      DateTime(now.year, now.month - 1),
+      DateTime(now.year, now.month),
+      DateTime(now.year, now.month + 1),
+    ];
+    _currentMonthIndex = 1; // Start at current month
+    // Only load once
+    controller.loadCalendars(_months);
   }
 
-  void _goToMonth(DateTime month) {
-    setState(() {
-      _focusedDay = month;
-    });
+  void _goToPrevMonth() {
+    if (_currentMonthIndex > 0) {
+      setState(() {
+        _currentMonthIndex--;
+      });
+    }
+  }
+
+  void _goToNextMonth() {
+    if (_currentMonthIndex < 2) {
+      setState(() {
+        _currentMonthIndex++;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final focusedDay = _months[_currentMonthIndex];
+    final prevEnabled = _currentMonthIndex > 0;
+    final nextEnabled = _currentMonthIndex < 2;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Work Calendar'),
@@ -49,7 +62,6 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
         } else if (controller.error.isNotEmpty) {
           return Center(child: Text(controller.error.value));
         }
-        // Custom header to control previous/next
         return Column(
           children: [
             Padding(
@@ -59,12 +71,10 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                 children: [
                   IconButton(
                     icon: Icon(Icons.chevron_left),
-                    onPressed: _focusedDay.isAtSameMomentAs(_prevMonth)
-                        ? null
-                        : () => _goToMonth(_prevMonth),
+                    onPressed: prevEnabled ? _goToPrevMonth : null,
                   ),
                   Text(
-                    DateFormat.yMMMM('id_ID').format(_focusedDay),
+                    DateFormat.yMMMM('id_ID').format(focusedDay),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 20,
@@ -73,17 +83,15 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                   ),
                   IconButton(
                     icon: Icon(Icons.chevron_right),
-                    onPressed: _focusedDay.isAtSameMomentAs(_nextMonth)
-                        ? null
-                        : () => _goToMonth(_nextMonth),
+                    onPressed: nextEnabled ? _goToNextMonth : null,
                   ),
                 ],
               ),
             ),
             TableCalendar(
-              firstDay: _prevMonth,
-              lastDay: _nextMonth,
-              focusedDay: _focusedDay,
+              firstDay: _months.first,
+              lastDay: _months.last,
+              focusedDay: focusedDay,
               locale: 'id_ID',
               calendarFormat: CalendarFormat.month,
               startingDayOfWeek: StartingDayOfWeek.sunday,
@@ -102,7 +110,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                   );
                 },
                 defaultBuilder: (context, date, _) {
-                  final inMonth = date.month == _focusedDay.month;
+                  final inMonth = date.month == focusedDay.month;
                   return Center(
                     child: Text(
                       '${date.day}',
