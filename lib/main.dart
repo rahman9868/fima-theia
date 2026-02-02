@@ -14,7 +14,6 @@ import 'features/work_calendar/data/attendance_remote_data_source.dart';
 import 'features/work_calendar/data/attendance_repository_impl.dart';
 import 'features/work_calendar/domain/usecase/get_work_calendar_usecase.dart';
 import 'features/work_calendar/presentation/work_calendar_controller.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 final GoRouter _router = GoRouter(
   routes: [
@@ -37,10 +36,11 @@ final GoRouter _router = GoRouter(
     ],
     );
 
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('id_ID', null);
+  await initializeDateFormatting('en_US', null);
   await Get.putAsync(() => TokenProvider().init());
   await HiveService.init();
   Get.put(AuthController());

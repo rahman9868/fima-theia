@@ -72,7 +72,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                     onPressed: prevEnabled ? _goToPrevMonth : null,
                   ),
                   Text(
-                    DateFormat.yMMMM('id_ID').format(focusedDay),
+                    DateFormat.yMMMM('en_US').format(focusedDay),
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 20,
@@ -90,7 +90,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
               firstDay: _months.first,
               lastDay: _months.last,
               focusedDay: focusedDay,
-              locale: 'id_ID',
+              locale: 'en_US',
               calendarFormat: CalendarFormat.month,
               startingDayOfWeek: StartingDayOfWeek.sunday,
               headerVisible: false,
