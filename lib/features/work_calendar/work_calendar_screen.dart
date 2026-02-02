@@ -13,13 +13,28 @@ class WorkCalendarScreen extends StatefulWidget {
 
 class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
   late DateTime _focusedDay;
+  late DateTime _prevMonth;
+  late DateTime _nextMonth;
   final controller = Get.find<WorkCalendarController>();
 
   @override
   void initState() {
     super.initState();
     _focusedDay = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    controller.loadCalendars([_focusedDay]);
+    _prevMonth = DateTime(_focusedDay.year, _focusedDay.month - 1);
+    _nextMonth = DateTime(_focusedDay.year, _focusedDay.month + 1);
+    // Load previous, current, and next month only once
+    controller.loadCalendars([
+      _prevMonth,
+      _focusedDay,
+      _nextMonth
+    ]);
+  }
+
+  void _goToMonth(DateTime month) {
+    setState(() {
+      _focusedDay = month;
+    });
   }
 
   @override
@@ -34,26 +49,49 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
         } else if (controller.error.isNotEmpty) {
           return Center(child: Text(controller.error.value));
         }
+        // Custom header to control previous/next
         return Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.chevron_left),
+                    onPressed: _focusedDay.isAtSameMomentAs(_prevMonth)
+                        ? null
+                        : () => _goToMonth(_prevMonth),
+                  ),
+                  Text(
+                    DateFormat.yMMMM('id_ID').format(_focusedDay),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.chevron_right),
+                    onPressed: _focusedDay.isAtSameMomentAs(_nextMonth)
+                        ? null
+                        : () => _goToMonth(_nextMonth),
+                  ),
+                ],
+              ),
+            ),
             TableCalendar(
-              firstDay: DateTime.utc(2000, 1, 1),
-              lastDay: DateTime.utc(2100, 12, 31),
+              firstDay: _prevMonth,
+              lastDay: _nextMonth,
               focusedDay: _focusedDay,
               locale: 'id_ID',
               calendarFormat: CalendarFormat.month,
               startingDayOfWeek: StartingDayOfWeek.sunday,
-              headerStyle: const HeaderStyle(
-                titleCentered: true,
-                formatButtonVisible: false,
-                leftChevronIcon: Icon(Icons.chevron_left),
-                rightChevronIcon: Icon(Icons.chevron_right),
-              ),
+              headerVisible: false,
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, events) {
                   final att = controller.attendances[date];
                   if (att == null) return null;
-                  // Red for absent, orange for late
                   Color iconColor = Colors.red;
                   if (att.status == AttendanceEventType.late) iconColor = Colors.orange;
                   return Column(
@@ -87,7 +125,6 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                   );
                 },
                 selectedBuilder: (context, date, _) {
-                  // Same as today
                   return Container(
                     decoration: BoxDecoration(
                       color: Colors.blue.shade100,
@@ -99,23 +136,12 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                   );
                 },
               ),
-              onPageChanged: (date) {
-                setState(() {
-                  _focusedDay = DateTime(date.year, date.month, 1);
-                });
-                controller.loadCalendars([_focusedDay]);
-              },
-              calendarStyle: CalendarStyle(
-                markersAlignment: Alignment.bottomCenter,
-                markersMaxCount: 1,
-                markerSize: 16,
-                weekendTextStyle: const TextStyle(color: Colors.black),
-              ),
               eventLoader: (date) {
                 final att = controller.attendances[date];
                 if (att != null) return [att];
                 return [];
               },
+              onPageChanged: (_) {}, // no-op
             ),
           ],
         );
