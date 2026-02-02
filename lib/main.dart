@@ -49,7 +49,7 @@ void main() async {
   final apiClient = Get.put(ApiClient());
   final remoteDataSource = Get.put(AttendanceRemoteDataSourceImpl(apiClient: apiClient));
   final attendanceRepository = Get.put(AttendanceRepositoryImpl(remoteDataSource: remoteDataSource));
-  final workCalendarUsecase = Get.put(GetWorkCalendarUsecase(repository: attendanceRepository));
+  final workCalendarUsecase = Get.put(GetThreeMonthWorkCalendarUsecase(repository: attendanceRepository));
   Get.put(WorkCalendarController(getWorkCalendarUsecase: workCalendarUsecase));
 
   runApp(const MyApp());
