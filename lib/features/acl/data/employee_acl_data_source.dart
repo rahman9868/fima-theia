@@ -1,7 +1,7 @@
 import '../../../core/network/api_client.dart';
 
 class EmployeeAclDataSource {
-  final ApiClient _client = ApiClient('https://wf.dev.neo-fusion.com/fira-api/');
+  final ApiClient _client = ApiClient();
 
   Future<Map<String, dynamic>?> fetchEmployeeAcl() async {
     try {

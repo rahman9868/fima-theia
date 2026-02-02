@@ -2,9 +2,7 @@ import '../../domain/entity/authentication_tokens.dart';
 import '../../../../core/network/api_client.dart';
 
 class AuthDataSource {
-  final ApiClient _client = ApiClient(
-    'https://wf.dev.neo-fusion.com/fira-api/'
-  );
+  final ApiClient _client = ApiClient();
 
   Future<(AuthenticationTokens?, String?)> login(String username, String password) async {
     try {

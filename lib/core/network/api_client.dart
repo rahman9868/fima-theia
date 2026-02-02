@@ -20,10 +20,10 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
-  final String baseUrl;
+  final String baseUrl = "https://wf.dev.neo-fusion.com/fira-api/";
   final TokenProvider _tokenProvider = Get.find<TokenProvider>();
 
-  ApiClient(this.baseUrl);
+  ApiClient();
 
   bool get _isDebugMode {
     var debug = false;

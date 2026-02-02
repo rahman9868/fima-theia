@@ -1,8 +1,7 @@
 import '../../../core/network/api_client.dart';
 
 class AttendanceSummaryDataSource {
-  final ApiClient _client =
-      ApiClient('https://wf.dev.neo-fusion.com/fira-api/');
+  final ApiClient _client =ApiClient();
 
   Future<Map<String, dynamic>?> fetchAttendanceSummary(
       {required int employeeId,
