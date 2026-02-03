@@ -13,164 +13,290 @@ class AttendanceScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Attendance'),
       ),
-      body: Obx(() {
-        if (controller.isLoading.value && controller.attendanceRecords.isEmpty) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 60,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  controller.errorMessage.value,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: controller.fetchAttendanceRecords,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.fetchAttendanceRecords,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Attendance Summary Card
-              Card(
-                margin: const EdgeInsets.all(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              const Spacer(flex: 1),
+              
+              // Location Section
+              _buildSectionTitle('Location'),
+              const SizedBox(height: 12),
+              Obx(() {
+                if (controller.isLoadingLocation.value) {
+                  return const Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Text(
+                          'Getting location...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Column(
+                  children: [
+                    Center(
+                      child: Icon(
+                        Icons.location_on,
+                        size: 32,
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Text(
+                        controller.currentAddress.value,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+              
+              const SizedBox(height: 32),
+              
+              // Picture Section
+              _buildSectionTitle('Picture'),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: controller.takePicture,
+                child: Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey[300]!,
+                      width: 1,
+                    ),
+                  ),
+                  child: Obx(() => controller.imageFile.value != null
+                      ? Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                controller.imageFile.value!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.imageFile.value = null;
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt,
+                              size: 48,
+                              color: Colors.grey[500],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Take Selfie',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Front Camera',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ],
+                        )),
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+
+              // Fingerprint Section
+              _buildSectionTitle('Biometric Verification'),
+              const SizedBox(height: 12),
+              Obx(() {
+                if (!controller.canCheckBiometrics.value) {
+                  return Column(
                     children: [
-                      Text(
-                        'Today\'s Attendance',
-                        style: Theme.of(context).textTheme.titleLarge,
+                      Icon(
+                        Icons.fingerprint,
+                        size: 64,
+                        color: Colors.grey[400],
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Status',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              Text(
-                                controller.attendanceRecords.isNotEmpty &&
-                                        controller.attendanceRecords.first.checkInTime != null
-                                    ? controller.attendanceRecords.first.checkOutTime != null
-                                        ? 'Checked Out'
-                                        : 'Checked In'
-                                    : 'Not Checked In',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      color: controller.attendanceRecords.isNotEmpty &&
-                                              controller.attendanceRecords.first.checkInTime != null
-                                          ? controller.attendanceRecords.first.checkOutTime != null
-                                              ? Colors.green
-                                              : Colors.blue
-                                          : Colors.grey,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          ElevatedButton(
-                            onPressed: controller.attendanceRecords.isEmpty ||
-                                    controller.attendanceRecords.first.checkOutTime != null
-                                ? controller.checkIn
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.login),
-                                SizedBox(width: 8),
-                                Text('Check In'),
-                              ],
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Biometric not available',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
-                  ),
-                ),
-              ),
+                  );
+                }
 
-              // Recent Attendance Records
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: controller.attendanceRecords.length,
-                  itemBuilder: (context, index) {
-                    final record = controller.attendanceRecords[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: Icon(
-                          record.checkInTime != null ? Icons.check_circle : Icons.pending,
-                          color: record.checkInTime != null ? Colors.green : Colors.grey,
-                        ),
-                        title: Text(
-                          '${record.date.day}/${record.date.month}/${record.date.year}',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (record.checkInTime != null)
-                              Text(
-                                'In: ${record.checkInTime?.hour.toString().padLeft(2, '0')}:${record.checkInTime?.minute.toString().padLeft(2, '0')}',
+                return GestureDetector(
+                  onTap: controller.isFingerprintVerified.value
+                      ? null
+                      : controller.verifyFingerprint,
+                  child: Center(
+                    child: Column(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          child: Stack(
+                            children: [
+                              Icon(
+                                controller.biometricType.value == 'Face ID'
+                                    ? Icons.face
+                                    : Icons.fingerprint,
+                                size: 64,
+                                color: controller.isFingerprintVerified.value
+                                    ? Colors.green
+                                    : (controller.isCheckingBiometrics.value
+                                        ? Colors.orange
+                                        : Colors.grey[400]),
                               ),
-                            if (record.checkOutTime != null)
-                              Text(
-                                'Out: ${record.checkOutTime?.hour.toString().padLeft(2, '0')}:${record.checkOutTime?.minute.toString().padLeft(2, '0')}',
-                              ),
-                            if (record.status != null)
-                              Text('Status: ${record.status}'),
-                          ],
-                        ),
-                        trailing: record.checkInTime != null && record.checkOutTime == null
-                            ? ElevatedButton(
-                                onPressed: () => controller.checkOut(record.employeeId),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.error,
-                                  foregroundColor: Colors.white,
+                              if (controller.isCheckingBiometrics.value)
+                                Positioned.fill(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      controller.biometricType.value == 'Face ID'
+                                          ? Colors.orange.withOpacity(0.8)
+                                          : Colors.grey[400]!,
+                                    ),
+                                  ),
                                 ),
-                                child: const Text('Check Out'),
-                              )
-                            : null,
-                      ),
-                    );
-                  },
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          controller.isCheckingBiometrics.value
+                              ? 'Verifying...'
+                              : (controller.isFingerprintVerified.value
+                                  ? '${controller.biometricType.value} Verified'
+                                  : 'Tap to verify with ${controller.biometricType.value}'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: controller.isFingerprintVerified.value
+                                ? Colors.green
+                                : (controller.isCheckingBiometrics.value
+                                    ? Colors.orange
+                                    : Colors.grey[600]),
+                            fontWeight: controller.isFingerprintVerified.value
+                                ? FontWeight.w500
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              
+              const Spacer(flex: 2),
+              
+              // Primary Action Button
+              Obx(() => ElevatedButton(
+                onPressed: controller.canSubmit()
+                    ? controller.submitAttendance
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey[300],
+                  disabledForegroundColor: Colors.grey[500],
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 2,
                 ),
-              ),
+                child: controller.isSubmitting.value || controller.isCheckingBiometrics.value
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'ATTENDANCE',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+              )),
+              
+              const SizedBox(height: 16),
             ],
           ),
-        );
-      }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: controller.fetchAttendanceRecords,
-        tooltip: 'Refresh',
-        child: const Icon(Icons.refresh),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
       ),
     );
   }
