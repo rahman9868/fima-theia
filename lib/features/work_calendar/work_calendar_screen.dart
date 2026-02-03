@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../work_calendar/domain/entity/attendance_event_type.dart';
 import '../work_calendar/presentation/work_calendar_controller.dart';
 import 'package:intl/intl.dart';
@@ -179,6 +180,13 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
                 return [];
               },
               onPageChanged: (_) {},
+              onDaySelected: (selectedDay, focusedDay) {
+                if (selectedDay.month == focusedDay.month) {
+                  final isoDate = selectedDay.toIso8601String();
+                  context.go('/work-calendar/detail/$isoDate');
+                }
+              },
+              selectedDayPredicate: (day) => isSameDay(day, focusedDay),
             ),
           ],
         );
