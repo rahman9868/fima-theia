@@ -9,6 +9,8 @@ import 'features/auth/presentation/controller/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/dashboard/about_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
+import 'features/work_calendar/domain/usecase/get_attendance_detail_usecase.dart';
+import 'features/work_calendar/presentation/attendance_detail_controller.dart';
 import 'features/work_calendar/work_calendar_screen.dart';
 import 'core/network/api_client.dart';
 import 'features/work_calendar/data/attendance_remote_data_source.dart';
@@ -60,6 +62,10 @@ void main() async {
   final attendanceRepository = Get.put(AttendanceRepositoryImpl(remoteDataSource: remoteDataSource));
   final workCalendarUsecase = Get.put(GetThreeMonthWorkCalendarUsecase(repository: attendanceRepository));
   Get.put(WorkCalendarController(getWorkCalendarUsecase: workCalendarUsecase));
+
+  // Dependency injection for Attendance Detail
+  final attendanceDetailUsecase = Get.put(GetAttendanceDetailUseCase(repository: attendanceRepository));
+  Get.put(AttendanceDetailController(useCase: attendanceDetailUsecase));
 
   runApp(const MyApp());
 }
