@@ -6,4 +6,5 @@ class AppRoutes {
   static const String about = '/about';
   static const String workCalendar = '/work-calendar';
   static const String workCalendarDetail = '/work-calendar/detail/:date';
+  static const String attendance = '/attendance';
 }

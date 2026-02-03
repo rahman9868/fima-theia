@@ -9,6 +9,8 @@ import 'features/auth/presentation/controller/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/dashboard/about_screen.dart';
 import 'features/dashboard/dashboard_screen.dart';
+import 'features/attendance/presentation/attendance_screen.dart';
+import 'features/attendance/presentation/attendance_controller.dart';
 import 'features/work_calendar/domain/usecase/get_attendance_detail_usecase.dart';
 import 'features/work_calendar/presentation/attendance_detail_controller.dart';
 import 'features/work_calendar/work_calendar_screen.dart';
@@ -45,6 +47,10 @@ final GoRouter _router = GoRouter(
         return AttendanceDetailPage(date: date);
       },
     ),
+    GoRoute(
+      path: AppRoutes.attendance,
+      builder: (context, state) => const AttendanceScreen(),
+    ),
     ],
     );
 
@@ -66,6 +72,9 @@ void main() async {
   // Dependency injection for Attendance Detail
   final attendanceDetailUsecase = Get.put(GetAttendanceDetailUseCase(repository: attendanceRepository));
   Get.put(AttendanceDetailController(useCase: attendanceDetailUsecase));
+
+  // Dependency injection for Attendance
+  Get.put(AttendanceController());
 
   runApp(const MyApp());
 }

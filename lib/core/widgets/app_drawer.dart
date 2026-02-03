@@ -61,6 +61,12 @@ class AppDrawer extends StatelessWidget {
               selected: _isCurrentRoute(location, AppRoutes.workCalendar),
               onTap: () => _onMenuTap(context, AppRoutes.workCalendar),
             ),
+            ListTile(
+              leading: const Icon(Icons.assignment_turned_in),
+              title: const Text('Attendance'),
+              selected: _isCurrentRoute(location, AppRoutes.attendance),
+              onTap: () => _onMenuTap(context, AppRoutes.attendance),
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
