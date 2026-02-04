@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import '../services/token_provider.dart';
+import '../services/navigation_service.dart';
 
 /// A custom exception for API errors.
 class ApiException implements Exception {
@@ -22,6 +23,7 @@ class ApiException implements Exception {
 class ApiClient {
   final String baseUrl = "https://wf.dev.neo-fusion.com/fira-api/";
   final TokenProvider _tokenProvider = Get.find<TokenProvider>();
+  final NavigationService _navigationService = Get.find<NavigationService>();
 
   ApiClient();
 
@@ -42,6 +44,16 @@ class ApiClient {
     return headers;
   }
 
+  Future<void> _handleUnauthorizedError() async {
+    try {
+      await _tokenProvider.clearTokens();
+      print('[API] Token expired, clearing tokens and redirecting to login');
+      _navigationService.navigateToLogin();
+    } catch (e) {
+      print('[API] Error handling 401: $e');
+    }
+  }
+
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
     final url = Uri.parse(baseUrl + endpoint);
     headers = await _injectAuthHeaders(headers);
@@ -54,6 +66,12 @@ class ApiClient {
       print('[API][STATUS] ${response.statusCode}');
       print('[API][BODY] ${response.body}');
     }
+    
+    if (response.statusCode == 401) {
+      await _handleUnauthorizedError();
+      throw ApiException('Session expired', statusCode: response.statusCode);
+    }
+    
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return json.decode(response.body);
     } else {
@@ -92,6 +110,12 @@ class ApiClient {
       print('[API][STATUS] ${response.statusCode}');
       print('[API][BODY] ${response.body}');
     }
+    
+    if (response.statusCode == 401 && requireAuth) {
+      await _handleUnauthorizedError();
+      throw ApiException('Session expired', statusCode: response.statusCode);
+    }
+    
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return json.decode(response.body);
     } else {

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'core/local/hive_service.dart';
 import 'core/routes/app_routes.dart';
 import 'core/services/token_provider.dart';
+import 'core/services/navigation_service.dart';
+import 'core/navigation/global_navigator.dart';
 import 'features/auth/presentation/controller/auth_controller.dart';
 import 'features/auth/presentation/login_screen.dart';
 import 'features/dashboard/about_screen.dart';
@@ -22,6 +24,7 @@ import 'features/work_calendar/presentation/work_calendar_controller.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 final GoRouter _router = GoRouter(
+  navigatorKey: globalNavigatorKey,
   routes: [
     GoRoute(
       path: AppRoutes.login,
@@ -59,6 +62,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('en_US', null);
   await Get.putAsync(() => TokenProvider().init());
+  await Get.putAsync(() => NavigationService().init());
   await HiveService.init();
   Get.put(AuthController());
 
