@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'attendance_controller.dart';
+import '../../../core/widgets/app_drawer.dart';
 
 class AttendanceScreen extends StatelessWidget {
   const AttendanceScreen({super.key});
@@ -13,6 +14,7 @@ class AttendanceScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Attendance'),
       ),
+      drawer: const AppDrawer(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

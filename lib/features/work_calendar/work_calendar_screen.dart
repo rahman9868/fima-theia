@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../work_calendar/domain/entity/attendance_event_type.dart';
 import '../work_calendar/presentation/work_calendar_controller.dart';
 import 'package:intl/intl.dart';
+import '../../core/widgets/app_drawer.dart';
 
 class WorkCalendarScreen extends StatefulWidget {
   const WorkCalendarScreen({super.key});
@@ -55,6 +56,7 @@ class _WorkCalendarScreenState extends State<WorkCalendarScreen> {
       appBar: AppBar(
         title: const Text('Work Calendar'),
       ),
+      drawer: const AppDrawer(),
       body: Obx(() {
         if (controller.loading.value) {
           return const Center(child: CircularProgressIndicator());
