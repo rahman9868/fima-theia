@@ -41,16 +41,25 @@ class LoginController extends GetxController {
     final (user, apiError) = await _loginUseCase.login(email, password);
     isLoading.value = false;
     if (user != null) {
-      Get.snackbar('Success', 'Login successful!');
-      if (context != null) context.go(AppRoutes.dashboard);
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go(AppRoutes.dashboard);
+      }
     } else {
       errorMessage.value = apiError ?? 'Invalid credentials';
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage.value),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
