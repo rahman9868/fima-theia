@@ -41,7 +41,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     required int month,
     required int day,
   }) async {
-    final res = await apiClient.get('/att/$employeeId/$year/$month/$day');
+    final res = await apiClient.get('att/$employeeId/$year/$month/$day');
     return AttendanceDetailModel.fromJson(res);
   }
 }
