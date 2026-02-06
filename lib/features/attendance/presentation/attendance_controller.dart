@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:local_auth/local_auth.dart';
@@ -29,8 +28,10 @@ class AttendanceController extends GetxController {
   final LocalAuthentication _localAuth = LocalAuthentication();
   final RxBool canCheckBiometrics = false.obs;
   final RxString biometricType = ''.obs;
-  
-  final ImagePicker _imagePicker = ImagePicker();
+
+  // ScaffoldMessenger key for showing snackbars
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void onInit() {
@@ -43,7 +44,7 @@ class AttendanceController extends GetxController {
     try {
       isLoadingLocation.value = true;
       currentAddress.value = 'Fetching location...';
-      
+
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -51,7 +52,7 @@ class AttendanceController extends GetxController {
         isLoadingLocation.value = false;
         return;
       }
-      
+
       // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -62,27 +63,27 @@ class AttendanceController extends GetxController {
           return;
         }
       }
-      
+
       if (permission == LocationPermission.deniedForever) {
         currentAddress.value = 'Location permissions are permanently denied';
         isLoadingLocation.value = false;
         return;
       }
-      
+
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      
+
       latitude.value = position.latitude.toString();
       longitude.value = position.longitude.toString();
-      
+
       // Reverse geocoding to get address
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
-      
+
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         String address = _formatAddress(place);
@@ -90,14 +91,9 @@ class AttendanceController extends GetxController {
       } else {
         currentAddress.value = 'Address not found';
       }
-      
     } catch (e) {
       currentAddress.value = 'Failed to get location';
-      Get.snackbar(
-        'Error',
-        'Failed to get location: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Error', 'Failed to get location: $e');
     } finally {
       isLoadingLocation.value = false;
     }
@@ -105,7 +101,7 @@ class AttendanceController extends GetxController {
 
   String _formatAddress(Placemark place) {
     List<String> addressParts = [];
-    
+
     if (place.street?.isNotEmpty == true) {
       addressParts.add(place.street!);
     }
@@ -121,50 +117,40 @@ class AttendanceController extends GetxController {
     if (place.country?.isNotEmpty == true) {
       addressParts.add(place.country!);
     }
-    
-    return addressParts.isNotEmpty ? addressParts.join(', ') : 'Unknown location';
+
+    return addressParts.isNotEmpty
+        ? addressParts.join(', ')
+        : 'Unknown location';
   }
 
   Future<void> takePicture() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 80,
-        preferredCameraDevice: CameraDevice.front,
-      );
+    // Navigate to custom camera screen
+    // The camera screen will call onPictureTaken with the image path
+    // This is handled by the UI layer which will call setImagePath
+  }
 
-      if (image != null) {
-        imageFile.value = File(image.path);
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to take picture: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    }
+  void setImagePath(String path) {
+    imageFile.value = File(path);
   }
 
   bool canSubmit() {
-    return imageFile.value != null && isFingerprintVerified.value && currentAddress.value != 'Fetching location...';
+    return imageFile.value != null &&
+        isFingerprintVerified.value &&
+        currentAddress.value != 'Fetching location...';
   }
 
   Future<void> submitAttendance() async {
     if (!canSubmit()) {
-      Get.snackbar(
-        'Incomplete',
-        'Please complete all required fields',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Incomplete', 'Please complete all required fields');
       return;
     }
 
     try {
       isSubmitting.value = true;
-      
+
       // Simulate API call delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Add new attendance record
       final newRecord = AttendanceRecord(
         date: DateTime.now(),
@@ -173,27 +159,20 @@ class AttendanceController extends GetxController {
         status: 'Present',
         notes: 'Picture and fingerprint verified at ${currentAddress.value}',
       );
-      
+
       attendanceRecords.insert(0, newRecord);
-      
-      Get.snackbar(
+
+      _showSnackbar(
         'Success',
         'Attendance submitted successfully',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
-        colorText: Colors.white,
       );
-      
+
       // Reset form
       imageFile.value = null;
       isFingerprintVerified.value = false;
-      
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to submit attendance: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Error', 'Failed to submit attendance: $e');
     } finally {
       isSubmitting.value = false;
     }
@@ -201,12 +180,10 @@ class AttendanceController extends GetxController {
 
   Future<void> verifyFingerprint() async {
     if (!canCheckBiometrics.value) {
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Biometric authentication is not available on this device',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
       return;
     }
@@ -224,40 +201,49 @@ class AttendanceController extends GetxController {
 
       if (authenticated) {
         isFingerprintVerified.value = true;
-        Get.snackbar(
+        _showSnackbar(
           'Verified',
           'Biometric verification successful',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
-          colorText: Colors.white,
         );
       } else {
-        Get.snackbar(
+        _showSnackbar(
           'Authentication Failed',
           'Biometric verification was cancelled or failed',
-          snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange,
-          colorText: Colors.white,
         );
       }
     } on PlatformException catch (e) {
       isFingerprintVerified.value = false;
-      Get.snackbar(
+      _showSnackbar(
         'Error',
         'Biometric authentication error: ${e.message ?? "Unknown error"}',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
     } catch (e) {
       isFingerprintVerified.value = false;
-      Get.snackbar(
-        'Error',
-        'Failed to verify biometric: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Error', 'Failed to verify biometric: $e');
     } finally {
       isCheckingBiometrics.value = false;
+    }
+  }
+
+  void _showSnackbar(String title, String message, {Color? backgroundColor}) {
+    try {
+      final context = Get.context;
+      if (context != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$title: $message'),
+            backgroundColor: backgroundColor ?? Colors.grey,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // Silently fail if snackbar cannot be shown
+      debugPrint('Failed to show snackbar: $e');
     }
   }
 
@@ -266,7 +252,8 @@ class AttendanceController extends GetxController {
       canCheckBiometrics.value = await _localAuth.canCheckBiometrics;
 
       if (canCheckBiometrics.value) {
-        List<BiometricType> availableBiometrics = await _localAuth.getAvailableBiometrics();
+        List<BiometricType> availableBiometrics = await _localAuth
+            .getAvailableBiometrics();
 
         if (availableBiometrics.contains(BiometricType.fingerprint)) {
           biometricType.value = 'Fingerprint';
@@ -288,9 +275,9 @@ class AttendanceController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
+
       await Future.delayed(const Duration(seconds: 1));
-      
+
       final mockData = [
         AttendanceRecord(
           date: DateTime.now(),
@@ -303,13 +290,15 @@ class AttendanceController extends GetxController {
         AttendanceRecord(
           date: DateTime.now().subtract(const Duration(days: 1)),
           employeeId: 'EMP001',
-          checkInTime: DateTime.now().subtract(const Duration(days: 1, hours: 9)),
+          checkInTime: DateTime.now().subtract(
+            const Duration(days: 1, hours: 9),
+          ),
           checkOutTime: DateTime.now().subtract(const Duration(days: 1)),
           status: 'Present',
           notes: '',
         ),
       ];
-      
+
       attendanceRecords.value = mockData;
     } catch (e) {
       errorMessage.value = 'Failed to load attendance records: $e';
@@ -322,7 +311,7 @@ class AttendanceController extends GetxController {
     try {
       isLoading.value = true;
       await Future.delayed(const Duration(seconds: 1));
-      
+
       final newRecord = AttendanceRecord(
         date: DateTime.now(),
         employeeId: 'EMP001',
@@ -330,20 +319,15 @@ class AttendanceController extends GetxController {
         status: 'Checked In',
         notes: 'Manual check-in',
       );
-      
+
       attendanceRecords.insert(0, newRecord);
-      
-      Get.snackbar(
+
+      _showSnackbar(
         'Success',
         'Checked in successfully at ${DateTime.now().toString()}',
-        snackPosition: SnackPosition.BOTTOM,
       );
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to check in: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Error', 'Failed to check in: $e');
     } finally {
       isLoading.value = false;
     }
@@ -353,10 +337,12 @@ class AttendanceController extends GetxController {
     try {
       isLoading.value = true;
       await Future.delayed(const Duration(seconds: 1));
-      
-      final index = attendanceRecords.indexWhere((record) => 
-          record.employeeId == 'EMP001' && record.checkOutTime == null);
-      
+
+      final index = attendanceRecords.indexWhere(
+        (record) =>
+            record.employeeId == 'EMP001' && record.checkOutTime == null,
+      );
+
       if (index != -1) {
         final updatedRecord = AttendanceRecord(
           date: attendanceRecords[index].date,
@@ -366,21 +352,16 @@ class AttendanceController extends GetxController {
           status: 'Checked Out',
           notes: attendanceRecords[index].notes,
         );
-        
+
         attendanceRecords[index] = updatedRecord;
-        
-        Get.snackbar(
+
+        _showSnackbar(
           'Success',
           'Checked out successfully at ${DateTime.now().toString()}',
-          snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to check out: $e',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      _showSnackbar('Error', 'Failed to check out: $e');
     } finally {
       isLoading.value = false;
     }
