@@ -31,7 +31,7 @@ class AssignmentController extends GetxController {
     _getFlexibleTempScheduleUseCase = GetFlexibleTempScheduleUseCase(repository);
   }
 
-  AssignmentType? getAssignmentType(Assignment assignment) {
+  AssignmentType getAssignmentType(Assignment assignment) {
     // Based on attendanceType, determine the assignment type
     // 0 = Schedule, 1 = Flexi, 2 = FlexiTemp (adjust based on actual API values)
     switch (assignment.attendanceType) {
@@ -75,6 +75,7 @@ class AssignmentController extends GetxController {
     errorMessage.value = '';
     try {
       final type = getAssignmentType(assignment);
+      
       switch (type) {
         case AssignmentType.schedule:
           final schedules = await _getScheduleUseCase();
