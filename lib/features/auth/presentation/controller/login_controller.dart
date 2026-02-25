@@ -11,15 +11,22 @@ import '../../../../core/services/token_provider.dart';
 import '../../../../core/routes/app_routes.dart';
 
 class LoginController extends GetxController {
-  final LoginUseCase _loginUseCase = LoginUseCase(
-    AuthRepositoryImpl(),
-    EmployeeAclRepositoryImpl(),
-  );
+  late final LoginUseCase _loginUseCase;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   var isLoading = false.obs;
   var errorMessage = ''.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize LoginUseCase with all dependencies
+    _loginUseCase = LoginUseCase(
+      AuthRepositoryImpl(),
+      EmployeeAclRepositoryImpl(),
+    );
+  }
 
   Future<void> checkIsLoggedIn(BuildContext? context) async {
     final tokenProvider = Get.find<TokenProvider>();
@@ -27,7 +34,10 @@ class LoginController extends GetxController {
     try {
       final userBox = await Hive.openBox<User>('userBox');
       final user = userBox.get('user');
-      if (token != null && token.isNotEmpty && user != null && context != null) {
+      if (token != null &&
+          token.isNotEmpty &&
+          user != null &&
+          context != null) {
         context.go(AppRoutes.dashboard);
       }
     } catch (_) {}
