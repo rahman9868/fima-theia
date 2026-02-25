@@ -20,6 +20,7 @@ dependencies:
   table_calendar: ^3.0.9
   image_picker: ^1.0.7
   camera: ^0.10.5+5
+  image: ^4.0.17
   geolocator: ^10.1.0
   geocoding: ^2.1.1
   permission_handler: ^11.0.1

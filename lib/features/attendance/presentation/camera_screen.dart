@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as path;
 
 class CameraScreen extends StatefulWidget {
   final Function(String imagePath) onPictureTaken;
@@ -120,9 +123,37 @@ class _CameraScreenState extends State<CameraScreen> {
     try {
       final image = await _controller!.takePicture();
 
-      if (mounted) {
-        widget.onPictureTaken(image.path);
-        Navigator.pop(context);
+      // Fix image rotation for front camera
+      final File imageFile = File(image.path);
+      final bytes = await imageFile.readAsBytes();
+      final originalImage = img.decodeImage(bytes);
+
+      if (originalImage != null) {
+        // For front camera, we need to flip horizontally and rotate
+        final fixedImage = img.copyRotate(originalImage, angle: 0);
+        img.flipHorizontal(fixedImage);
+
+        // Save the fixed image
+        final fixedPath = path.join(
+          path.dirname(image.path),
+          'fixed_${path.basename(image.path)}',
+        );
+        final fixedFile = File(fixedPath);
+        await fixedFile.writeAsBytes(img.encodeJpg(fixedImage, quality: 95));
+
+        // Delete original image
+        await imageFile.delete();
+
+        if (mounted) {
+          widget.onPictureTaken(fixedPath);
+          Navigator.pop(context);
+        }
+      } else {
+        // If decoding fails, use original image
+        if (mounted) {
+          widget.onPictureTaken(image.path);
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {
