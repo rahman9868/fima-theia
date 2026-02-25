@@ -9,9 +9,14 @@ import '../../data/repository/auth_repository_impl.dart';
 import '../../../acl/data/employee_acl_repository_impl.dart';
 import '../../../../core/services/token_provider.dart';
 import '../../../../core/routes/app_routes.dart';
+import '../../../assignment/domain/usecase/get_assignments_usecase.dart';
+import '../../../assignment/data/assignment_repository_impl.dart';
+import '../../../assignment/data/assignment_remote_data_source.dart';
+import '../../../../core/network/api_client.dart';
 
 class LoginController extends GetxController {
   late final LoginUseCase _loginUseCase;
+  late final GetAssignmentsUseCase _getAssignmentsUseCase;
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -25,6 +30,12 @@ class LoginController extends GetxController {
     _loginUseCase = LoginUseCase(
       AuthRepositoryImpl(),
       EmployeeAclRepositoryImpl(),
+    );
+    // Initialize GetAssignmentsUseCase
+    _getAssignmentsUseCase = GetAssignmentsUseCase(
+      AssignmentRepositoryImpl(
+        AssignmentRemoteDataSource(ApiClient()),
+      ),
     );
   }
 
@@ -51,6 +62,16 @@ class LoginController extends GetxController {
     final (user, apiError) = await _loginUseCase.login(email, password);
     isLoading.value = false;
     if (user != null) {
+      // Fetch and save assignments after successful login
+      try {
+        final assignments = await _getAssignmentsUseCase();
+        await _getAssignmentsUseCase.saveAssignments(assignments);
+        print('[Login] Successfully fetched and saved ${assignments.length} assignments');
+      } catch (e) {
+        print('[Login] Failed to fetch assignments: $e');
+        // Continue with login even if assignment fetch fails
+      }
+      
       if (context != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
