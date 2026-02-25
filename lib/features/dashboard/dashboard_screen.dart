@@ -5,17 +5,33 @@ import 'package:intl/intl.dart';
 import '../../core/widgets/app_drawer.dart';
 import 'presentation/controller/dashboard_controller.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final DashboardController controller = Get.put(DashboardController());
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
 
+class _DashboardScreenState extends State<DashboardScreen> {
+  late final DashboardController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize or retrieve the controller and trigger data load
+    try {
+      controller = Get.find<DashboardController>();
+    } catch (e) {
+      controller = Get.put(DashboardController());
+    }
+    // Force load the dashboard summary when entering the screen
+    controller.loadDashboardSummary();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
+      appBar: AppBar(title: const Text('Dashboard')),
       drawer: const AppDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -29,9 +45,7 @@ class DashboardScreen extends StatelessWidget {
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Text(controller.errorMessage.value),
-          );
+          return Center(child: Text(controller.errorMessage.value));
         }
 
         final workingDays = summary?.workingDays ?? 0;
@@ -60,19 +74,13 @@ class DashboardScreen extends StatelessWidget {
                   Text(
                     'Last Update : $lastUpdate',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black87,
-                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'Please Pull to Refresh',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                   const SizedBox(height: 16),
                   Card(
@@ -158,40 +166,26 @@ class _DashboardItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          Icons.bookmark,
-          color: color,
-          size: 20,
-        ),
+        Icon(Icons.bookmark, color: color, size: 20),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF1565C0),
-            ),
+            style: const TextStyle(fontSize: 16, color: Color(0xFF1565C0)),
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
-          ':',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
+        const Text(':', style: TextStyle(fontSize: 16)),
         const SizedBox(width: 8),
         SizedBox(
           width: 48,
           child: Text(
             value,
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontSize: 16),
           ),
         ),
       ],
     );
   }
-  }
+}
